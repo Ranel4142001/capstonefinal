@@ -1,5 +1,7 @@
 <?php
 session_start();
+
+// Check if the user is logged in, if not then redirect to login page
 if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
     header("location: login.php");
     exit;
@@ -7,8 +9,9 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
 
 require_once '../config/db.php';
 
-$name = $barcode = $description = $price = $cost_price = $stock_quantity = $category_id = $supplier_id = "";
-$name_err = $barcode_err = $description_err = $price_err = $cost_price_err = $stock_quantity_err = $category_id_err = "";
+// Initialize variables
+$name = $barcode = $description = $price = $cost_price = $stock_quantity = $category_id = $supplier_id = $brand = "";
+$name_err = $barcode_err = $description_err = $price_err = $cost_price_err = $stock_quantity_err = $category_id_err = $brand_err = "";
 $success_message = $error_message = "";
 
 // Fetch categories for dropdown
@@ -60,9 +63,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (!empty(trim($_POST["cost_price"])) && is_numeric($_POST["cost_price"]) && $_POST["cost_price"] >= 0) {
         $cost_price = floatval($_POST["cost_price"]);
     } else if (!empty(trim($_POST["cost_price"]))) {
-         $cost_price_err = "Please enter a valid cost price (non-negative number).";
+        $cost_price_err = "Please enter a valid cost price (non-negative number).";
     }
-
 
     // Stock Quantity
     if (empty(trim($_POST["stock_quantity"])) || !is_numeric($_POST["stock_quantity"]) || $_POST["stock_quantity"] < 0) {
@@ -78,6 +80,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $category_id = intval($_POST["category_id"]);
     }
 
+    // Brand (New field)
+    $brand = trim($_POST["brand"]);
+    // Optional: Add validation for brand if needed, e.g., max length
+    // if (strlen($brand) > 100) {
+    //     $brand_err = "Brand name cannot exceed 100 characters.";
+    // }
+
     // Description (optional)
     $description = trim($_POST["description"]);
 
@@ -86,8 +95,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 
     // Check input errors before inserting into database
-    if (empty($name_err) && empty($barcode_err) && empty($price_err) && empty($cost_price_err) && empty($stock_quantity_err) && empty($category_id_err)) {
-        $sql = "INSERT INTO products (name, barcode, description, price, cost_price, stock_quantity, category_id, supplier_id, is_active) VALUES (:name, :barcode, :description, :price, :cost_price, :stock_quantity, :category_id, :supplier_id, 1)";
+    if (empty($name_err) && empty($barcode_err) && empty($price_err) && empty($cost_price_err) && empty($stock_quantity_err) && empty($category_id_err) && empty($brand_err)) {
+        $sql = "INSERT INTO products (name, barcode, description, price, cost_price, stock_quantity, category_id, supplier_id, brand, is_active) VALUES (:name, :barcode, :description, :price, :cost_price, :stock_quantity, :category_id, :supplier_id, :brand, 1)";
 
         if ($stmt = $pdo->prepare($sql)) {
             $stmt->bindParam(":name", $param_name, PDO::PARAM_STR);
@@ -98,6 +107,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt->bindParam(":stock_quantity", $param_stock_quantity, PDO::PARAM_INT);
             $stmt->bindParam(":category_id", $param_category_id, PDO::PARAM_INT);
             $stmt->bindParam(":supplier_id", $param_supplier_id, PDO::PARAM_INT);
+            $stmt->bindParam(":brand", $param_brand, PDO::PARAM_STR); // Bind new brand parameter
 
             $param_name = $name;
             $param_barcode = !empty($barcode) ? $barcode : NULL;
@@ -107,11 +117,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $param_stock_quantity = $stock_quantity;
             $param_category_id = $category_id;
             $param_supplier_id = $supplier_id; // Will be NULL if not set
+            $param_brand = !empty($brand) ? $brand : NULL; // Set brand parameter
 
             if ($stmt->execute()) {
                 $success_message = "Product added successfully!";
                 // Clear form fields
-                $name = $barcode = $description = $price = $cost_price = $stock_quantity = $category_id = $supplier_id = "";
+                $name = $barcode = $description = $price = $cost_price = $stock_quantity = $category_id = $supplier_id = $brand = "";
             } else {
                 $error_message = "Error adding product. Please try again.";
                 error_log("Error executing product insert: " . $stmt->errorInfo()[2]);
@@ -121,19 +132,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     unset($pdo);
 }
-?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add New Product</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../public/css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-</head>
-<body>
+// Include the common header file
+include '../includes/header.php';
+?>
     <div class="dashboard-wrapper">
         <?php include '../includes/sidebar.php'; ?>
         <div class="main-content" id="main-content">
@@ -187,6 +189,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 <label for="barcode" class="form-label">Barcode (Optional)</label>
                                 <input type="text" name="barcode" id="barcode" class="form-control <?php echo (!empty($barcode_err)) ? 'is-invalid' : ''; ?>" value="<?php echo htmlspecialchars($barcode); ?>">
                                 <div class="invalid-feedback"><?php echo $barcode_err; ?></div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="brand" class="form-label">Brand (Optional)</label>
+                                <input type="text" name="brand" id="brand" class="form-control <?php echo (!empty($brand_err)) ? 'is-invalid' : ''; ?>" value="<?php echo htmlspecialchars($brand); ?>">
+                                <div class="invalid-feedback"><?php echo $brand_err; ?></div>
                             </div>
                             <div class="mb-3">
                                 <label for="description" class="form-label">Description (Optional)</label>
