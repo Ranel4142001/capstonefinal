@@ -1,81 +1,69 @@
-/* public/css/style.css */
+/* your_pos_project_root/public/css/style.css */
 
-/* General dashboard layout adjustments */
+/* General Body Styling */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f2f5;
+    /* Light grey background */
+    color: #333;
+    overflow-x: hidden;
+    /* Prevent horizontal scroll when sidebar slides */
+}
+
+/* Dashboard Wrapper - Flexbox for layout */
 .dashboard-wrapper {
-    display: flex; /* Ensures sidebar and main content are side-by-side */
-    min-height: 100vh; /* Make sure it takes full viewport height */
+    display: flex;
+    min-height: 100vh;
+    /* Ensure it takes full viewport height */
+    /* REMOVED: padding-top: 56px; - This is handled by main-content now */
 }
 
-.main-content {
-    flex-grow: 1; /* Allows main content to take remaining space */
-    padding-left: 250px; /* Initial padding for collapsed sidebar if you have one */
-    /* Adjust this padding-top to create space below the fixed navbar */
-    /* The height of your navbar seems to be around 56px (Bootstrap default) + some margin/padding */
-    padding-top: 70px; /* Start with 70px, adjust this value */
-    transition: padding-left 0.3s ease; /* Smooth transition for sidebar toggle */
-}
-
-/* For when the sidebar is toggled (assuming main.js adds 'active' class to main-content) */
-.main-content.active {
-    padding-left: 0; /* Remove padding when sidebar is fully hidden on smaller screens */
-}
-
-
-/* Adjust the container where your dashboard content resides */
-.dashboard-page-content {
-    /* Remove default Bootstrap margins/paddings that might be pushing it down further */
-    margin-top: 0 !important;
-    padding-top: 0 !important; /* Remove any additional top padding here, as main-content now handles it */
-}
-
-/* Adjust the custom navbar top padding if it looks too bulky */
-.custom-navbar-top {
-    /* Reduce vertical padding if needed, but often not necessary if main-content padding is right */
-    padding-top: 0.5rem; /* Default Bootstrap 5 padding */
-    padding-bottom: 0.5rem; /* Default Bootstrap 5 padding */
-    /* If you want it really compact, you can go lower, e.g., 0.3rem */
-}
-
-
-/* Adjust the h2 specifically if it still has too much top margin */
-.dashboard-page-content h2 {
-    margin-top: 0; /* Remove its default top margin */
-    margin-bottom: 1.5rem; /* Keep some bottom margin for spacing */
-}
-
-/* Sidebar Specific Styles (if not already in style.css, add them) */
+/* --- Sidebar Styling --- */
 .sidebar {
-    width: 250px; /* Fixed width of the sidebar */
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100%;
-    background-color: #343a40; /* Dark background */
-    color: white;
-    padding-top: 60px; /* Adjust based on your navbar height if it overlaps sidebar header */
-    transition: all 0.3s ease;
-    z-index: 1030; /* Ensure sidebar is above other content but below navbar if needed */
-}
-
-.sidebar.hidden {
-    left: -250px; /* Hide sidebar off-screen */
+    width: 250px;
+    /* Default width for desktop */
+    background-color: #2c3e50;
+    /* Dark blue-grey */
+    color: #ecf0f1;
+    padding-top: 20px;
+    /* This padding is for content within the sidebar itself */
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease-in-out;
+    /* Smooth transition for width/position changes */
+    flex-shrink: 0;
+    /* Prevents sidebar from shrinking */
+    overflow-y: auto;
+    /* Enable scrolling for long menus */
+    position: relative;
+    /* Essential for desktop layout */
 }
 
 .sidebar-header {
-    padding: 15px;
-    text-align: center;
-    background-color: #212529; /* Slightly darker header */
-    position: absolute; /* Position header within sidebar */
-    width: 100%;
-    top: 0; /* Align to top of sidebar */
-    left: 0;
-    z-index: 1; /* Ensure header content is on top */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px 20px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 10px;
 }
 
 .sidebar-header h3 {
     margin: 0;
+    font-size: 1.5em;
     color: #fff;
-    font-size: 1.5rem;
+}
+
+.close-sidebar-btn {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 2em;
+    cursor: pointer;
+    display: none;
+    /* Hidden by default, shown on mobile */
+    padding: 0 5px;
 }
 
 .sidebar-menu {
@@ -85,77 +73,270 @@
 }
 
 .sidebar-menu li {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 2px;
 }
 
-.sidebar-menu li:last-child {
-    border-bottom: none;
-}
-
-.sidebar-menu a {
-    display: block;
-    padding: 10px 15px;
-    color: rgba(255, 255, 255, 0.8);
+.sidebar-menu li a {
+    display: flex;
+    /* For icon and text alignment */
+    align-items: center;
+    padding: 12px 20px;
+    color: #ecf0f1;
     text-decoration: none;
-    transition: background-color 0.2s;
+    transition: background-color 0.2s ease;
 }
 
-.sidebar-menu a:hover {
-    background-color: #495057; /* Lighter hover background */
+.sidebar-menu li a i {
+    /* Icon styling if you use Font Awesome */
+    margin-right: 10px;
+    font-size: 1.1em;
+    width: 20px;
+    /* Give icons a fixed width for alignment */
+    text-align: center;
+}
+
+.sidebar-menu li a:hover,
+.sidebar-menu li a.active {
+    /* Add 'active' class for current page */
+    background-color: #34495e;
     color: #fff;
 }
 
-.sidebar-menu .fa-solid, .sidebar-menu .fas {
-    margin-right: 10px;
+.sidebar-menu .menu-heading {
+    color: #bdc3c7;
+    /* Lighter grey for section headings */
+    font-size: 0.85em;
+    padding: 15px 20px 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-/* Close button for sidebar on smaller screens */
-.close-sidebar-btn {
-    display: none; /* Hidden by default */
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: transparent;
-    border: none;
-    font-size: 2rem;
-    color: white;
-    cursor: pointer;
+.sidebar-menu .menu-item-bottom {
+    margin-top: auto;
+    /* Pushes the logout button to the bottom */
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 10px;
 }
 
-/* Media query for smaller screens - to show close button and adjust main content */
-@media (max-width: 991.98px) { /* Bootstrap's 'lg' breakpoint */
-    .sidebar {
-        left: -250px; /* Sidebar starts hidden */
-        z-index: 1040; /* Higher z-index for mobile overlay */
+/* --- Main Content Area --- */
+.main-content {
+    flex-grow: 1;
+    /* Allows main content to fill remaining space */
+    background-color: #f8f9fa;
+    /* Slightly lighter than body background */
+    transition: margin-left 0.3s ease-in-out;
+    /* Smooth transition for content shift */
+
+    /* KEY ADJUSTMENT: This padding must match your fixed navbar's height + desired buffer */
+    padding-top: 70px;
+    /* Try adjusting this value (e.g., 60px, 65px, 75px) */
+    padding-left: 20px;
+    /* Default horizontal padding */
+    padding-right: 20px;
+    /* Default horizontal padding */
+}
+
+/* Adjustments for the Bootstrap fixed-top navbar */
+.custom-navbar-top {
+    z-index: 1030;
+    /* Ensure navbar is above sidebar if needed */
+    /* Ensure no extra vertical padding on the navbar itself, if you want it more compact */
+    padding-top: 0.5rem;
+    /* Standard Bootstrap padding */
+    padding-bottom: 0.5rem;
+    /* Standard Bootstrap padding */
+}
+
+.dashboard-page-content {
+    /* REMOVED: padding: 20px; - Main content now handles top padding */
+    /* Ensure no extra top padding/margin directly on this container */
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+    padding-bottom: 20px;
+    /* Keep bottom padding */
+    padding-left: 0;
+    /* Let .main-content handle left/right if this is full-width */
+    padding-right: 0;
+}
+
+/* Target the H2 directly inside dashboard-page-content */
+.dashboard-page-content h2 {
+    margin-top: 0;
+    /* Crucial: Remove default browser/Bootstrap top margin */
+    margin-bottom: 1.5rem;
+    /* Keep existing bottom margin for spacing to content */
+}
+
+
+/* Dashboard Cards - Responsive Grid */
+.dashboard-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    /* Auto-fit columns */
+    gap: 25px;
+    /* Space between cards */
+    margin-top: 20px;
+}
+
+.card {
+    background-color: #fff;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    text-align: center;
+    transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    /* Slight lift on hover */
+}
+
+.card h3 {
+    margin-top: 0;
+    color: #333;
+    font-size: 1.3em;
+    margin-bottom: 15px;
+}
+
+.card p {
+    font-size: 2.2em;
+    font-weight: bold;
+    color: #007bff;
+    /* Blue color for values */
+    margin-bottom: 0;
+}
+
+/* --- Overlay for Mobile Sidebar --- */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    /* Semi-transparent black */
+    z-index: 998;
+    /* Below sidebar, above content */
+    display: none;
+    /* Hidden by default */
+    transition: opacity 0.3s ease;
+    opacity: 0;
+}
+
+.overlay.active {
+    display: block;
+    opacity: 1;
+}
+
+/* --- Responsive & Toggle States --- */
+
+/* Desktop Specific Styles (min-width: 769px) */
+@media (min-width: 769px) {
+
+    /* Sidebar hidden on desktop */
+    .sidebar.hidden {
+        width: 0;
+        padding: 0;
+        overflow: hidden;
+        /* Hide scrollbar and content */
     }
 
-    .sidebar.show { /* Class added by JS when toggled open */
+    /* Main content adjusts when sidebar is hidden on desktop */
+    .main-content.sidebar-collapsed {
+        /* When sidebar is collapsed on desktop, this removes the left offset */
+        padding-left: 20px;
+        /* Just general left padding */
+    }
+
+    .main-content {
+        /* On desktop, main content starts with initial padding-left for the visible sidebar */
+        /* This calc ensures proper spacing: sidebar width + desired padding */
+        padding-left: calc(250px + 20px);
+        /* Sidebar width + 20px content padding */
+    }
+
+    .sidebar {
+        position: fixed;
+        /* Keep sidebar fixed on desktop too */
+        left: 0;
+        /* Make sure it's visible */
+        height: 100vh;
+        /* Full viewport height */
+    }
+
+    .close-sidebar-btn {
+        display: none;
+        /* Hide close button on desktop */
+    }
+
+    .overlay {
+        display: none !important;
+        /* Ensure overlay is always hidden on desktop */
+    }
+
+    /* Keep the desktop toggle button visible */
+    #sidebarToggleDesktop {
+        display: block !important;
+    }
+
+    #sidebarToggle {
+        /* Hide mobile toggle button on desktop */
+        display: none !important;
+    }
+}
+
+/* Mobile Specific Styles (max-width: 768px) */
+@media (max-width: 768px) {
+    .sidebar {
+        position: fixed;
+        /* Fixed position for mobile sidebar */
+        height: 100%;
+        left: -250px;
+        /* Start off-screen to the left */
+        top: 0;
+        /* Start from the very top */
+        z-index: 9999;
+        /* Ensure it's on top of everything */
+        box-shadow: 5px 0 15px rgba(0, 0, 0, 0.3);
+        /* Stronger shadow for mobile */
+    }
+
+    .sidebar.active {
+        /* When toggled open on mobile */
         left: 0;
     }
 
     .close-sidebar-btn {
-        display: block; /* Show close button on smaller screens */
+        display: block;
+        /* Show the close button on mobile */
     }
 
     .main-content {
-        padding-left: 0; /* No left padding when sidebar is hidden on small screens */
-    }
-
-    .overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
+        margin-left: 0;
+        /* Main content always takes full width on mobile */
         width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 1039;
-        display: none; /* Hidden by default */
-    }
-    .overlay.show {
-        display: block;
+        padding-left: 20px;
+        /* Ensure horizontal padding on mobile */
+        padding-right: 20px;
+        /* Re-evaluate padding-top for mobile if navbar collapses */
+        /* If navbar is still fixed-top and small, 70px might be okay, otherwise adjust */
+        padding-top: 70px;
+        /* Keep same as desktop for consistency, adjust if needed */
     }
 
-    .dashboard-page-content {
-        padding-top: 0; /* Remove extra padding on smaller screens as well */
+    .dashboard-cards {
+        grid-template-columns: 1fr;
+        /* Stack cards vertically on small screens */
+    }
+
+    /* Hide desktop toggle button on mobile */
+    #sidebarToggleDesktop {
+        display: none !important;
+    }
+
+    #sidebarToggle {
+        /* Show mobile toggle button on mobile */
+        display: block !important;
     }
 }

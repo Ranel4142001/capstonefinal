@@ -232,7 +232,6 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
                             <div class="card-footer text-end">
                                 <h4 class="mb-2">Total: <span id="cartTotal">₱ 0.00</span></h4>
                                 <button class="btn btn-success me-2" id="completeSaleBtn">Complete Sale</button>
-                                <button class="btn btn-warning me-2" id="holdSaleBtn" data-bs-toggle="modal" data-bs-target="#heldSalesModal">Hold Sale</button>
                                 <button class="btn btn-danger" id="clearCartBtn">Clear Cart</button>
                             </div>
                         </div>
@@ -320,7 +319,7 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
 
     <div id="receipt-template" style="display: none;">
     <div>
-        <h3>Ramil Dondon's Store</h3>
+        <h3>YOUR STORE NAME HERE</h3>
         <p>Your Address, Danao City, Philippines</p>
         <p>Contact: (012) 345-6789</p>
         <p>VAT Reg. TIN: 123-456-789-00000</p>

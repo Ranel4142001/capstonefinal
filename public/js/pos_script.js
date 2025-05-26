@@ -299,7 +299,7 @@ document.addEventListener('DOMContentLoaded', function () {
             `\nTax Applied: ${taxRate}% (${formatCurrency(calculatedTaxAmount)})` +
             `\nPayment Method: ${paymentMethod}` +
             (paymentMethod === 'Cash' ? `\nCash Received: ${formatCurrency(cashReceived)}\nChange Due: ${formatCurrency(changeDue)}` : '') // Use calculated changeDue
-            )) {
+        )) {
             return; // User cancelled
         }
 
@@ -468,7 +468,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Event listener for payment method changes (to show/hide cash section)
     if (paymentMethodSelect) {
-        paymentMethodSelect.addEventListener('change', function() {
+        paymentMethodSelect.addEventListener('change', function () {
             const cashSection = document.getElementById('cashPaymentSection');
             if (this.value === 'Cash') {
                 cashSection.style.display = 'block';
@@ -507,33 +507,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
     });
-
-    // The manual quantity input change listener is mostly redundant now that we have buttons,
-    // and the input is readonly. If you ever make it editable again, you can re-enable this.
-    // cartItemsTableBody.addEventListener('change', function (event) {
-    //     const target = event.target;
-    //     if (target.classList.contains('item-quantity')) { // Updated class name
-    //         const productId = target.dataset.productId;
-    //         let newQuantity = parseInt(target.value);
-
-    //         if (isNaN(newQuantity) || newQuantity < 1) {
-    //             newQuantity = 1;
-    //             target.value = newQuantity;
-    //         }
-
-    //         const itemIndex = cart.findIndex(item => item.id == productId);
-    //         if (itemIndex > -1) {
-    //             const item = cart[itemIndex];
-    //             if (newQuantity > item.stock_quantity) {
-    //                 alert(`Cannot exceed available stock (${item.stock_quantity}) for ${item.name}.`);
-    //                 newQuantity = item.stock_quantity;
-    //                 target.value = newQuantity;
-    //             }
-    //             item.quantity = newQuantity;
-    //             updateCartDisplay();
-    //         }
-    //     }
-    // });
 
     // Initial display update when the page loads
     updateCartDisplay();
