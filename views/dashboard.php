@@ -1,0 +1,95 @@
+<?php
+session_start();
+
+// Check if the user is logged in, if not then redirect to login page
+if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
+    header("location: login.php");
+    exit;
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POS Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../public/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+    <div class="dashboard-wrapper">
+
+        <?php include '../includes/sidebar.php'; ?>
+
+        <div class="main-content" id="main-content">
+            <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top px-3 custom-navbar-top">
+                <div class="container-fluid">
+                    <button id="sidebarToggle" class="btn btn-outline-light d-lg-none me-3" type="button">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                     <button id="sidebarToggleDesktop" class="btn btn-outline-light d-none d-lg-block me-3" type="button">
+                        <i class="fas fa-bars"></i> </button>
+
+                    <a class="navbar-brand" href="#">POS System</a>
+
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                            </ul>
+                        <ul class="navbar-nav ms-auto">
+                            <li class="nav-item d-flex align-items-center">
+                                <span class="nav-link text-white me-2">Welcome, <?php echo htmlspecialchars($_SESSION["username"]); ?> (Role: <?php echo htmlspecialchars($_SESSION["role"]); ?>)</span>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link btn btn-danger btn-sm text-white" href="logout.php">Logout</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="container-fluid dashboard-page-content mt-5 pt-3">
+                <h1 class="mb-4">Welcome to the POS Dashboard!</h1>
+                <p>This is where you'll see an overview of your sales and inventory.</p>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card text-center mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">Today's Sales</h5>
+                                <p class="card-text fs-2">₱ 0.00</p>
+                                <a href="pos_system.php" class="btn btn-primary">Go to Sales</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-center mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">Low Stock Items</h5>
+                                <p class="card-text fs-2">0</p>
+                                <a href="inventory.php" class="btn btn-warning">View Inventory</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card text-center mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">Total Products</h5>
+                                <p class="card-text fs-2">0</p>
+                                <a href="inventory.php" class="btn btn-info">Manage Products</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                </div>
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../public/js/main.js"></script>
+    <script src="../public/js/pos_script.js"></script>
+</body>
+</html>

@@ -1,0 +1,161 @@
+/* public/css/style.css */
+
+/* General dashboard layout adjustments */
+.dashboard-wrapper {
+    display: flex; /* Ensures sidebar and main content are side-by-side */
+    min-height: 100vh; /* Make sure it takes full viewport height */
+}
+
+.main-content {
+    flex-grow: 1; /* Allows main content to take remaining space */
+    padding-left: 250px; /* Initial padding for collapsed sidebar if you have one */
+    /* Adjust this padding-top to create space below the fixed navbar */
+    /* The height of your navbar seems to be around 56px (Bootstrap default) + some margin/padding */
+    padding-top: 70px; /* Start with 70px, adjust this value */
+    transition: padding-left 0.3s ease; /* Smooth transition for sidebar toggle */
+}
+
+/* For when the sidebar is toggled (assuming main.js adds 'active' class to main-content) */
+.main-content.active {
+    padding-left: 0; /* Remove padding when sidebar is fully hidden on smaller screens */
+}
+
+
+/* Adjust the container where your dashboard content resides */
+.dashboard-page-content {
+    /* Remove default Bootstrap margins/paddings that might be pushing it down further */
+    margin-top: 0 !important;
+    padding-top: 0 !important; /* Remove any additional top padding here, as main-content now handles it */
+}
+
+/* Adjust the custom navbar top padding if it looks too bulky */
+.custom-navbar-top {
+    /* Reduce vertical padding if needed, but often not necessary if main-content padding is right */
+    padding-top: 0.5rem; /* Default Bootstrap 5 padding */
+    padding-bottom: 0.5rem; /* Default Bootstrap 5 padding */
+    /* If you want it really compact, you can go lower, e.g., 0.3rem */
+}
+
+
+/* Adjust the h2 specifically if it still has too much top margin */
+.dashboard-page-content h2 {
+    margin-top: 0; /* Remove its default top margin */
+    margin-bottom: 1.5rem; /* Keep some bottom margin for spacing */
+}
+
+/* Sidebar Specific Styles (if not already in style.css, add them) */
+.sidebar {
+    width: 250px; /* Fixed width of the sidebar */
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background-color: #343a40; /* Dark background */
+    color: white;
+    padding-top: 60px; /* Adjust based on your navbar height if it overlaps sidebar header */
+    transition: all 0.3s ease;
+    z-index: 1030; /* Ensure sidebar is above other content but below navbar if needed */
+}
+
+.sidebar.hidden {
+    left: -250px; /* Hide sidebar off-screen */
+}
+
+.sidebar-header {
+    padding: 15px;
+    text-align: center;
+    background-color: #212529; /* Slightly darker header */
+    position: absolute; /* Position header within sidebar */
+    width: 100%;
+    top: 0; /* Align to top of sidebar */
+    left: 0;
+    z-index: 1; /* Ensure header content is on top */
+}
+
+.sidebar-header h3 {
+    margin: 0;
+    color: #fff;
+    font-size: 1.5rem;
+}
+
+.sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-menu li {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-menu li:last-child {
+    border-bottom: none;
+}
+
+.sidebar-menu a {
+    display: block;
+    padding: 10px 15px;
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    transition: background-color 0.2s;
+}
+
+.sidebar-menu a:hover {
+    background-color: #495057; /* Lighter hover background */
+    color: #fff;
+}
+
+.sidebar-menu .fa-solid, .sidebar-menu .fas {
+    margin-right: 10px;
+}
+
+/* Close button for sidebar on smaller screens */
+.close-sidebar-btn {
+    display: none; /* Hidden by default */
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: transparent;
+    border: none;
+    font-size: 2rem;
+    color: white;
+    cursor: pointer;
+}
+
+/* Media query for smaller screens - to show close button and adjust main content */
+@media (max-width: 991.98px) { /* Bootstrap's 'lg' breakpoint */
+    .sidebar {
+        left: -250px; /* Sidebar starts hidden */
+        z-index: 1040; /* Higher z-index for mobile overlay */
+    }
+
+    .sidebar.show { /* Class added by JS when toggled open */
+        left: 0;
+    }
+
+    .close-sidebar-btn {
+        display: block; /* Show close button on smaller screens */
+    }
+
+    .main-content {
+        padding-left: 0; /* No left padding when sidebar is hidden on small screens */
+    }
+
+    .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1039;
+        display: none; /* Hidden by default */
+    }
+    .overlay.show {
+        display: block;
+    }
+
+    .dashboard-page-content {
+        padding-top: 0; /* Remove extra padding on smaller screens as well */
+    }
+}
