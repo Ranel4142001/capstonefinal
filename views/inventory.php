@@ -53,7 +53,7 @@ include '../includes/header.php';
                                 <span class="nav-link text-white me-2">Welcome, <?php echo htmlspecialchars($_SESSION["username"]); ?> (Role: <?php echo htmlspecialchars($_SESSION["role"]); ?>)</span>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link btn btn-danger btn-sm text-white" href="logout.php">Logout</a>
+                                <a class="nav-link btn btn-danger btn-sm text-white" href="../index.php">Logout</a>
                             </li>
                         </ul>
                     </div>

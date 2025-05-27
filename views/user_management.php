@@ -59,7 +59,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $message_type = 'danger';
                         } else {
                             // Insert new user into the database using prepared statements for security
-                            $stmt = $conn->prepare("INSERT INTO users (username, password, email, role) VALUES (?, ?, ?, ?)");
+                            // CHANGED: 'password' to 'password_hash' in the INSERT query
+                            $stmt = $conn->prepare("INSERT INTO users (username, password_hash, email, role) VALUES (?, ?, ?, ?)");
                             $stmt->bind_param("ssss", $username, $hashed_password, $email, $role);
                             if ($stmt->execute()) {
                                 $message = "User '{$username}' added successfully!";
@@ -108,7 +109,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                                 if (!empty($password)) {
                                     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-                                    $sql .= ", password = ?";
+                                    // CHANGED: 'password' to 'password_hash' in the UPDATE query
+                                    $sql .= ", password_hash = ?";
                                     $params .= "s";
                                     $values[] = $hashed_password;
                                 }
