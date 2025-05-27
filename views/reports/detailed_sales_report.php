@@ -1,10 +1,6 @@
 <?php
 // views/reports/detailed_sales_report.php
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 require_once '../../includes/auth_check.php';
 
 // Ensure only 'admin' or 'staff' can access this page
@@ -177,8 +173,8 @@ include '../../includes/header.php';
                             <span class="nav-link text-white me-2">Welcome, <?php echo htmlspecialchars($_SESSION["username"]); ?> (Role: <?php echo htmlspecialchars($_SESSION["role"]); ?>)</span>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link btn btn-danger btn-sm text-white" href="<?php echo $base_url_path; ?>/views/logout.php">Logout</a>
-                        </li>
+                        <a class="nav-link btn btn-danger btn-sm text-white" href="<?php echo $base_url_path; ?>/index.php">Logout</a>                        
+                    </li>
                     </ul>
                 </div>
             </div>
