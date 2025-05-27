@@ -18,11 +18,7 @@
                 <i class="fas fa-box-open"></i> Manage Products
             </a>
             <ul class="collapse list-unstyled" id="manageProductsSubmenu">
-                <li>
-                    <a href="inventory.php" class="sidebar-link submenu-link">
-                        <i class="fas fa-sitemap"></i> Add Categories
-                    </a>
-                </li>
+
                 <li>
                     <a href="add_product.php" class="sidebar-link submenu-link">
                         <i class="fas fa-plus-square"></i> Add Product
