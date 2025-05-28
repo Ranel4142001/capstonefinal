@@ -1,6 +1,6 @@
 // your_pos_project_root/public/js/inventory_script.js
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const productTableBody = document.getElementById('productTableBody');
     const productSearch = document.getElementById('productSearch');
     const categoryFilter = document.getElementById('categoryFilter');
@@ -10,6 +10,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const productsPerPage = 10;
     let currentPage = 1;
     let totalProducts = 0;
+
+    // Edit Modal Elements (New additions for modal functionality)
+    // Get the Bootstrap modal instance
+    const editProductModal = new bootstrap.Modal(document.getElementById('editProductModal'));
+    // Get the form inside the modal
+    const editProductForm = document.getElementById('editProductForm');
+    // Get individual input fields from the modal form
+    const editProductId = document.getElementById('editProductId');
+    const editProductName = document.getElementById('editProductName');
+    const editProductCategory = document.getElementById('editProductCategory');
+    const editProductPrice = document.getElementById('editProductPrice');
+    const editProductStock = document.getElementById('editProductStock');
+    const editProductBarcode = document.getElementById('editProductBarcode');
 
     // Function to fetch products from the API and update the table
     async function fetchProducts() {
@@ -67,18 +80,35 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td>${product.stock_quantity}</td>
                 <td>${htmlspecialchars(product.barcode || 'N/A')}</td>
                 <td>
-                    <a href="edit_product.php?id=${product.id}" class="btn btn-sm btn-info me-1" title="Edit Product"><i class="fas fa-edit"></i></a>
-                    <button class="btn btn-sm btn-danger delete-product-btn" data-id="${product.id}" title="Delete Product"><i class="fas fa-trash"></i></button>
+                    <button class="btn btn-sm btn-info me-1 edit-product-btn"
+                            data-id="${product.id}"
+                            data-name="${htmlspecialchars(product.name)}"
+                            data-category-id="${product.category_id}"
+                            data-price="${product.price}"
+                            data-stock="${product.stock_quantity}"
+                            data-barcode="${htmlspecialchars(product.barcode || '')}"
+                            title="Edit Product">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger delete-product-btn" data-id="${product.id}" title="Delete Product">
+                        <i class="fas fa-trash"></i>
+                    </button>
                 </td>
             `;
             productTableBody.appendChild(row);
         });
 
-        // Attach event listeners for delete buttons
+        // Attach event listeners for edit and delete buttons after products are displayed
+        document.querySelectorAll('.edit-product-btn').forEach(button => {
+            button.addEventListener('click', openEditModal);
+        });
+
         document.querySelectorAll('.delete-product-btn').forEach(button => {
-            button.addEventListener('click', function() {
+            button.addEventListener('click', function () {
                 const productId = this.dataset.id;
-                if (confirm('Are you sure you want to delete this product?')) {
+                // You might want to fetch the product name for a more user-friendly confirmation
+                const productName = this.closest('tr').querySelector('td:nth-child(2)').textContent;
+                if (confirm(`Are you sure you want to delete "${productName}"?`)) {
                     deleteProduct(productId);
                 }
             });
@@ -120,7 +150,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Add event listeners for page clicks
         productPagination.querySelectorAll('.page-link').forEach(link => {
-            link.addEventListener('click', function(e) {
+            link.addEventListener('click', function (e) {
                 e.preventDefault();
                 const page = parseInt(this.dataset.page);
                 if (page > 0 && page <= totalPages && page !== currentPage) {
@@ -130,6 +160,67 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
+
+    // Function to open the edit modal and populate its fields
+    function openEditModal(event) {
+        const button = event.currentTarget; // The clicked edit button
+        const productId = button.dataset.id;
+        const productName = button.dataset.name;
+        const productCategoryId = button.dataset.categoryId;
+        const productPrice = button.dataset.price;
+        const productStock = button.dataset.stock;
+        const productBarcode = button.dataset.barcode;
+
+        // Populate the modal form fields with the product data
+        editProductId.value = productId;
+        editProductName.value = productName;
+        editProductCategory.value = productCategoryId;
+        editProductPrice.value = parseFloat(productPrice).toFixed(2); // Ensure price is formatted
+        editProductStock.value = productStock;
+        editProductBarcode.value = productBarcode;
+
+        // Show the modal
+        editProductModal.show();
+    }
+
+    // Event listener for the edit product form submission
+    editProductForm.addEventListener('submit', async function (event) {
+        event.preventDefault(); // Prevent default form submission
+
+        const formData = new FormData(editProductForm);
+        const productId = formData.get('id'); // Get the product ID from the hidden input
+
+        // Convert FormData to a plain JavaScript object for JSON submission
+        const productData = {};
+        formData.forEach((value, key) => {
+            productData[key] = value;
+        });
+
+        try {
+            // Send a PUT request to your API endpoint
+            const response = await fetch(`../api/products.php`, {
+                method: 'PUT', // Use PUT for updating resources
+                headers: {
+                    'Content-Type': 'application/json' // Indicate that the body is JSON
+                },
+                body: JSON.stringify(productData) // Send data as JSON string
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                alert('Product updated successfully!');
+                editProductModal.hide(); // Hide the modal on success
+                fetchProducts(); // Refresh the product list to show updated data
+            } else {
+                alert('Error updating product: ' + (data.message || 'Unknown error.'));
+            }
+        } catch (error) {
+            console.error('Error updating product:', error);
+            alert('Failed to update product due to a network or server error.');
+        }
+    });
+
 
     // Function to handle product deletion
     async function deleteProduct(productId) {
@@ -157,6 +248,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Helper for HTML escaping (basic)
     function htmlspecialchars(str) {
+        if (typeof str !== 'string') return str; // Return non-strings as is
         const map = {
             '&': '&amp;',
             '<': '&lt;',
@@ -164,7 +256,7 @@ document.addEventListener('DOMContentLoaded', function() {
             '"': '&quot;',
             "'": '&#039;'
         };
-        return str.replace(/[&<>"']/g, function(m) { return map[m]; });
+        return str.replace(/[&<>"']/g, function (m) { return map[m]; });
     }
 
     // Event Listeners for Filters
@@ -182,7 +274,6 @@ document.addEventListener('DOMContentLoaded', function() {
         currentPage = 1;
         fetchProducts();
     });
-
 
     // Initial fetch of products when the page loads
     fetchProducts();

@@ -1,4 +1,6 @@
 <?php
+// products.php - Your API endpoint
+
 // Enable CORS for AJAX requests if your frontend is on a different origin (e.g., different port)
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
@@ -6,9 +8,12 @@ header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
 header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
-// ... (existing headers and db.php include) ...
+// Enable error reporting for debugging. IMPORTANT: DISABLE OR SET TO 0 IN PRODUCTION.
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
-require_once '../config/db.php';
+require_once '../config/db.php'; // Your database connection using PDO
 
 $method = $_SERVER['REQUEST_METHOD'];
 
@@ -17,13 +22,15 @@ switch ($method) {
         handleGetRequest($pdo);
         break;
     case 'POST':
-        // handlePostRequest($pdo); // For adding products
+        // handlePostRequest($pdo); // This case is for adding new products, uncomment and define if needed.
+        http_response_code(405); // Method Not Allowed by default if not implemented
+        echo json_encode(array("message" => "POST method not implemented."));
         break;
     case 'PUT':
-        // handlePutRequest($pdo); // For updating products
+        handlePutRequest($pdo); // <-- UNCOMMENT THIS LINE AND DEFINE THE FUNCTION
         break;
     case 'DELETE':
-        handleDeleteRequest($pdo); // For deleting products
+        handleDeleteRequest($pdo); // <-- UNCOMMENT THIS LINE AND DEFINE THE FUNCTION (if it's commented out in your file)
         break;
     default:
         http_response_code(405); // Method Not Allowed
@@ -32,7 +39,7 @@ switch ($method) {
 }
 
 function handleGetRequest($pdo) {
-    $searchTerm = trim($_GET['search'] ?? ''); // Trim whitespace
+    $searchTerm = trim($_GET['search'] ?? '');
     $categoryId = $_GET['category_id'] ?? '';
     $limit = (int)($_GET['limit'] ?? 10);
     $offset = (int)($_GET['offset'] ?? 0);
@@ -41,29 +48,14 @@ function handleGetRequest($pdo) {
             FROM products p
             LEFT JOIN categories c ON p.category_id = c.id";
     $conditions = [];
-    $params = []; // This will now store named parameters
+    $params = [];
 
     if (!empty($searchTerm)) {
-        // Option 1: Prioritize exact barcode match
-        // Check if the search term looks like a barcode
-        // Removed the separate COUNT(*) check for simplicity and to prevent
-        // an extra database call for every search. The combined LIKE/equals will work.
-        // The problem is in the binding of parameters.
-
-        // If you want to strictly prioritize exact barcode matches,
-        // you could still do a separate query first.
-        // For now, let's go with a combined search which is more common.
-        // We'll use named parameters for everything.
-
-        // Check if searchTerm is purely numeric and of typical barcode length for a direct barcode search.
-        // This regex '/^[0-9]{6,14}$/' is an example; adjust {6,14} based on your typical barcode lengths.
-        if (preg_match('/^[0-9]+$/', $searchTerm)) { // Check if it's purely numeric
-            // Attempt to search by exact barcode OR by name (partial)
+        if (preg_match('/^[0-9]+$/', $searchTerm)) {
             $conditions[] = "(p.barcode = :searchBarcode OR p.name LIKE :searchName)";
             $params[':searchBarcode'] = $searchTerm;
             $params[':searchName'] = "%" . $searchTerm . "%";
         } else {
-            // If not numeric, search by name (partial) and also partial barcode match
             $conditions[] = "(p.name LIKE :searchName OR p.barcode LIKE :searchPartialBarcode)";
             $params[':searchName'] = "%" . $searchTerm . "%";
             $params[':searchPartialBarcode'] = "%" . $searchTerm . "%";
@@ -78,30 +70,21 @@ function handleGetRequest($pdo) {
         $sql .= " WHERE " . implode(' AND ', $conditions);
     }
 
-    // --- Main Query with Named Parameters ---
     $main_sql = $sql . " ORDER BY p.name ASC LIMIT :limit OFFSET :offset";
-
-    // --- Count Query with Named Parameters ---
     $countSql = "SELECT COUNT(*) FROM products p";
     if (count($conditions) > 0) {
         $countSql .= " WHERE " . implode(' AND ', $conditions);
     }
 
     try {
-        // Prepare and execute the count query first
         $countStmt = $pdo->prepare($countSql);
-        // Bind parameters for the count query
         foreach ($params as $key => $val) {
             $countStmt->bindValue($key, $val, is_int($val) ? PDO::PARAM_INT : PDO::PARAM_STR);
         }
         $countStmt->execute();
         $totalProducts = $countStmt->fetchColumn();
 
-
-        // Prepare and execute the main product query
         $stmt = $pdo->prepare($main_sql);
-
-        // Bind all parameters (including limit and offset)
         foreach ($params as $key => $val) {
             $stmt->bindValue($key, $val, is_int($val) ? PDO::PARAM_INT : PDO::PARAM_STR);
         }
@@ -115,12 +98,88 @@ function handleGetRequest($pdo) {
 
     } catch (PDOException $e) {
         error_log("Error fetching products: " . $e->getMessage() . "\nSQL: " . $main_sql . "\nParams: " . print_r($params, true) . "\nLimit: " . $limit . "\nOffset: " . $offset);
-        http_response_code(500); // Internal Server Error
+        http_response_code(500);
         echo json_encode(array("success" => false, "message" => "Error fetching products: " . $e->getMessage()));
     }
 }
 
-// ... (handleDeleteRequest function remains the same) ...
+// --- DEFINE handlePutRequest FUNCTION ---
+function handlePutRequest($pdo) {
+    $input = file_get_contents('php://input');
+    $data = json_decode($input, true);
 
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'Invalid JSON input for PUT.']);
+        exit();
+    }
 
+    $required_fields = ['id', 'name', 'category_id', 'price', 'stock_quantity'];
+    foreach ($required_fields as $field) {
+        if (!isset($data[$field]) || ($field !== 'barcode' && $data[$field] === '')) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => "Missing or empty required field: {$field}"]);
+            exit();
+        }
+    }
+
+    try {
+        $id = $data['id'];
+        $name = $data['name'];
+        $category_id = $data['category_id'];
+        $price = $data['price'];
+        $stock_quantity = $data['stock_quantity'];
+        $barcode = $data['barcode'] ?? null;
+
+        $stmt = $pdo->prepare("UPDATE products SET
+                                name = ?,
+                                category_id = ?,
+                                price = ?,
+                                stock_quantity = ?,
+                                barcode = ?
+                            WHERE id = ?");
+
+        $stmt->execute([$name, $category_id, $price, $stock_quantity, $barcode, $id]);
+
+        if ($stmt->rowCount()) {
+            echo json_encode(['success' => true, 'message' => 'Product updated successfully.']);
+        } else {
+            http_response_code(200); // Still OK, but no change occurred
+            echo json_encode(['success' => false, 'message' => 'Product not found or no changes made.']);
+        }
+
+    } catch (PDOException $e) {
+        error_log("Product update error: " . $e->getMessage());
+        http_response_code(500);
+        echo json_encode(['success' => false, 'message' => 'Database error during update: ' . $e->getMessage()]);
+    }
+}
+
+// --- DEFINE handleDeleteRequest FUNCTION ---
+function handleDeleteRequest($pdo) {
+    $product_id = $_GET['id'] ?? null;
+
+    if (empty($product_id) || !is_numeric($product_id)) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'Invalid product ID provided.']);
+        exit();
+    }
+
+    try {
+        $stmt = $pdo->prepare("DELETE FROM products WHERE id = ?");
+        $stmt->execute([$product_id]);
+
+        if ($stmt->rowCount()) {
+            echo json_encode(['success' => true, 'message' => 'Product deleted successfully.']);
+        } else {
+            http_response_code(404); // Not Found
+            echo json_encode(['success' => false, 'message' => 'Product not found.']);
+        }
+
+    } catch (PDOException $e) {
+        error_log("Product deletion error: " . $e->getMessage());
+        http_response_code(500);
+        echo json_encode(['success' => false, 'message' => 'Database error during deletion: ' . $e->getMessage()]);
+    }
+}
 ?>
