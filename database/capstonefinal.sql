@@ -1,161 +1,441 @@
--- Database: capstonefinal
--- Create the database if it doesn't exist
-CREATE DATABASE IF NOT EXISTS capstonefinal;
+-- phpMyAdmin SQL Dump
+-- version 5.2.1
+-- https://www.phpmyadmin.net/
+--
+-- Host: 127.0.0.1
+-- Generation Time: May 28, 2025 at 07:11 AM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
 
--- Use the newly created database
-USE capstonefinal;
-
-/* --- */
-/* 1. Users Table */
-/* Stores information about system users (e.g., admin, cashier, manager) */
-CREATE TABLE users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(50) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL, -- Stores bcrypt hashed passwords
-    role VARCHAR(20) DEFAULT 'cashier', -- e.g., 'admin', 'cashier', 'manager'
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    last_login DATETIME NULL
-);
-
-/* --- */
-
-/* 2. Categories Table */
-/* Organizes products into logical groups */
-CREATE TABLE categories (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) UNIQUE NOT NULL,
-    description TEXT NULL
-);
-
-/* --- */
-
--- 3. Suppliers Table
--- Stores details of product suppliers
-CREATE TABLE suppliers (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) UNIQUE NOT NULL,
-    contact_person VARCHAR(100) NULL,
-    phone VARCHAR(20) NULL,
-    email VARCHAR(100) NULL,
-    address TEXT NULL
-);
-
-/* --- */
-
--- 4. Products Table
--- Stores information about all inventory items
-CREATE TABLE products (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    barcode VARCHAR(50) UNIQUE NOT NULL, -- Unique identifier for scanning
-    name VARCHAR(255) NOT NULL,
-    description TEXT NULL,
-    price DECIMAL(10, 2) NOT NULL,      -- Selling price
-    cost_price DECIMAL(10, 2) NULL,     -- Cost to the business (for profit calculation)
-    stock_quantity INT NOT NULL DEFAULT 0,
-    category_id INT NULL,
-    supplier_id INT NULL,
-    is_active TINYINT(1) DEFAULT 1,     -- 1 for active, 0 for inactive/discontinued
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL,
-    FOREIGN KEY (supplier_id) REFERENCES suppliers(id) ON DELETE SET NULL
-);
-
-/* --- */
-
--- 5. Customers Table
--- (Optional) Stores information about customers for loyalty or tracking purposes
-CREATE TABLE customers (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    phone VARCHAR(20) NULL,
-    email VARCHAR(100) NULL,
-    address TEXT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-
-/* --- */
-
--- 6. Sales Table
--- Records each completed sales transaction
-CREATE TABLE sales (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    sale_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    total_amount DECIMAL(10, 2) NOT NULL,
-    discount_amount DECIMAL(10, 2) DEFAULT 0.00,
-    tax_amount DECIMAL(10, 2) DEFAULT 0.00,
-    payment_method VARCHAR(50) NOT NULL, -- e.g., 'Cash', 'Credit Card', 'GCash'
-    cashier_id INT NOT NULL,             -- Who processed the sale
-    customer_id INT NULL,                -- Who made the purchase (if recorded)
-    status VARCHAR(20) DEFAULT 'completed', -- e.g., 'completed', 'returned', 'on_hold'
-    FOREIGN KEY (cashier_id) REFERENCES users(id) ON DELETE RESTRICT, -- Prevent deleting user if they have sales
-    FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE SET NULL
-);
-
-/* --- */
-
--- 7. Sale_Items Table
--- Details each product included in a sale
-CREATE TABLE sale_items (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    sale_id INT NOT NULL,
-    product_id INT NOT NULL,
-    quantity INT NOT NULL,
-    price_at_sale DECIMAL(10, 2) NOT NULL, -- Price at the time of sale (in case product price changes)
-    subtotal DECIMAL(10, 2) NOT NULL,
-    FOREIGN KEY (sale_id) REFERENCES sales(id) ON DELETE CASCADE, -- If sale is deleted, items are too
-    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE RESTRICT -- Prevent deleting product if it's in a sale
-);
-
-/* --- */
-
--- 8. Stock_Adjustments Table
--- Tracks manual changes to inventory (e.g., damage, returns, stock-take)
-CREATE TABLE stock_adjustments (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    product_id INT NOT NULL,
-    type VARCHAR(20) NOT NULL,           -- e.g., 'add', 'remove', 'damage', 'return', 'initial_stock'
-    quantity_change INT NOT NULL,        -- Positive for increases, negative for decreases
-    reason TEXT NULL,
-    adjusted_by_user_id INT NOT NULL,    -- Who made the adjustment
-    adjustment_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE RESTRICT,
-    FOREIGN KEY (adjusted_by_user_id) REFERENCES users(id) ON DELETE RESTRICT
-);  
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
 
 
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
 
+--
+-- Database: `capstonefinal`
+--
 
+-- --------------------------------------------------------
 
+--
+-- Table structure for table `categories`
+--
 
+CREATE TABLE `categories` (
+  `id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `description` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `categories`
+--
 
+INSERT INTO `categories` (`id`, `name`, `description`) VALUES
+(1, 'Electronics', NULL),
+(2, 'Clothing', NULL),
+(3, 'Food & Beverage', NULL),
+(4, 'Books', NULL),
+(5, 'Home Goods', NULL),
+(6, 'drinks', 'coca cola');
 
+-- --------------------------------------------------------
 
+--
+-- Table structure for table `customers`
+--
 
-INSERT INTO categories (name) VALUES
-('Electronics'),
-('Clothing'),
-('Food & Beverage'),
-('Books'),
-('Home Goods');
+CREATE TABLE `customers` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `address` text DEFAULT NULL,
+  `created_at` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- --------------------------------------------------------
 
+--
+-- Table structure for table `products`
+--
 
-INSERT INTO products (name, barcode, description, price, cost_price, stock_quantity, category_id, supplier_id, is_active) VALUES
-('Laptop Pro', '123456789012', 'High-performance laptop for professionals', 1200.00, 900.00, 15, 1, NULL, 1),
-('Wireless Mouse', '987654321098', 'Ergonomic wireless mouse', 25.50, 15.00, 50, 1, NULL, 1),
-('T-Shirt (Medium)', '112233445566', 'Comfortable cotton t-shirt', 15.00, 7.50, 100, 2, NULL, 1),
-('Coffee Beans (250g)', '223344556677', 'Freshly roasted arabica beans', 8.75, 4.00, 40, 3, NULL, 1),
-('The Great Novel', '334455667788', 'A compelling fiction novel', 20.00, 10.00, 30, 4, NULL, 1),
-('Desk Lamp', '445566778899', 'Modern LED desk lamp', 35.99, 20.00, 20, 5, NULL, 1),
-('Bluetooth Speaker', '556677889900', 'Portable speaker with clear sound', 75.00, 40.00, 25, 1, NULL, 1),
-('Jeans (Size 32)', '667788990011', 'Slim fit denim jeans', 45.00, 25.00, 60, 2, NULL, 1),
-('Energy Drink (Can)', '778899001122', 'Refreshing energy boost', 2.50, 1.00, 200, 3, NULL, 1),
-('Cookbook: Italian', '889900112233', 'Authentic Italian recipes', 30.00, 15.00, 10, 4, NULL, 1),
-('Yoga Mat', '990011223344', 'Non-slip yoga mat', 22.00, 10.00, 35, 5, NULL, 1);
+CREATE TABLE `products` (
+  `id` int(11) NOT NULL,
+  `barcode` varchar(50) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `cost_price` decimal(10,2) DEFAULT NULL,
+  `stock_quantity` int(11) NOT NULL DEFAULT 0,
+  `category_id` int(11) DEFAULT NULL,
+  `supplier_id` int(11) DEFAULT NULL,
+  `brand` varchar(255) DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT 1,
+  `created_at` datetime DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `products`
+--
 
+INSERT INTO `products` (`id`, `barcode`, `name`, `description`, `price`, `cost_price`, `stock_quantity`, `category_id`, `supplier_id`, `brand`, `is_active`, `created_at`, `updated_at`) VALUES
+(1, '123456789012', 'Laptop Pro', 'High-performance laptop for professionals', 1200.00, 900.00, 13, 1, NULL, NULL, 1, '2025-05-26 11:48:14', '2025-05-28 11:08:04'),
+(2, '987654321098', 'Wireless Mouse', 'Ergonomic wireless mouse', 25.50, 15.00, 50, 1, NULL, NULL, 1, '2025-05-26 11:48:14', '2025-05-26 11:48:14'),
+(3, '112233445566', 'T-Shirt (Medium)', 'Comfortable cotton t-shirt', 15.00, 7.50, 100, 2, NULL, NULL, 1, '2025-05-26 11:48:14', '2025-05-26 11:48:14'),
+(4, '223344556677', 'Coffee Beans (250g)', 'Freshly roasted arabica beans', 8.75, 4.00, 7, 3, NULL, NULL, 1, '2025-05-26 11:48:14', '2025-05-28 12:25:11'),
+(5, '334455667788', 'The Great Novel', 'A compelling fiction novel', 20.00, 10.00, 30, 4, NULL, NULL, 1, '2025-05-26 11:48:14', '2025-05-26 11:48:14'),
+(6, '445566778899', 'Desk Lamp', 'Modern LED desk lamp', 35.99, 20.00, 10, 5, NULL, NULL, 1, '2025-05-26 11:48:14', '2025-05-26 15:18:19'),
+(7, '556677889900', 'Bluetooth Speaker', 'Portable speaker with clear sound', 75.00, 40.00, 9, 1, NULL, NULL, 1, '2025-05-26 11:48:14', '2025-05-28 13:09:03'),
+(8, '667788990011', 'Jeans (Size 32)', 'Slim fit denim jeans', 45.00, 25.00, 60, 2, NULL, NULL, 1, '2025-05-26 11:48:14', '2025-05-26 11:48:14'),
+(9, '778899001122', 'Energy Drink (Can)', 'Refreshing energy boost', 2.50, 1.00, 200, 3, NULL, NULL, 1, '2025-05-26 11:48:14', '2025-05-26 11:48:14'),
+(10, '889900112233', 'Cookbook: Italian', 'Authentic Italian recipes', 30.00, 15.00, 8, 4, NULL, NULL, 1, '2025-05-26 11:48:14', '2025-05-27 14:39:55'),
+(11, '990011223344', 'Yoga Mat', 'Non-slip yoga mat', 22.00, 10.00, 35, 5, NULL, NULL, 1, '2025-05-26 11:48:14', '2025-05-26 11:48:14');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `sales`
+--
+
+CREATE TABLE `sales` (
+  `id` int(11) NOT NULL,
+  `sale_date` datetime DEFAULT current_timestamp(),
+  `total_amount` decimal(10,2) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `discount_amount` decimal(10,2) DEFAULT 0.00,
+  `tax_amount` decimal(10,2) DEFAULT 0.00,
+  `payment_method` varchar(50) NOT NULL,
+  `cash_received` decimal(10,2) DEFAULT NULL,
+  `change_due` decimal(10,2) DEFAULT NULL,
+  `cashier_id` int(11) NOT NULL,
+  `customer_id` int(11) DEFAULT NULL,
+  `status` varchar(20) DEFAULT 'completed'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `sales`
+--
+
+INSERT INTO `sales` (`id`, `sale_date`, `total_amount`, `user_id`, `discount_amount`, `tax_amount`, `payment_method`, `cash_received`, `change_due`, `cashier_id`, `customer_id`, `status`) VALUES
+(3, '2025-05-26 15:05:17', 75.00, NULL, 0.00, 0.00, 'Cash', NULL, NULL, 1, NULL, 'completed'),
+(4, '2025-05-26 15:06:48', 75.00, NULL, 0.00, 0.00, 'Cash', NULL, NULL, 1, NULL, 'completed'),
+(5, '2025-05-26 15:11:45', 8.75, NULL, 0.00, 0.00, 'Cash', NULL, NULL, 1, NULL, 'completed'),
+(6, '2025-05-26 15:13:14', 30.00, NULL, 0.00, 0.00, 'Cash', NULL, NULL, 1, NULL, 'completed'),
+(7, '2025-05-26 15:18:19', 403.09, NULL, 0.00, 0.00, 'Cash', NULL, NULL, 1, NULL, 'completed'),
+(8, '2025-05-26 15:22:35', 252.00, NULL, 0.00, 0.00, 'Cash', NULL, NULL, 1, NULL, 'completed'),
+(9, '2025-05-26 15:27:56', 420.00, NULL, 0.00, 0.00, 'Cash', NULL, NULL, 1, NULL, 'completed'),
+(10, '2025-05-26 15:38:55', 420.00, NULL, 0.00, 0.00, 'Cash', NULL, NULL, 1, NULL, 'completed'),
+(11, '2025-05-26 15:44:22', 336.00, NULL, 0.00, 0.00, 'Cash', NULL, NULL, 1, NULL, 'completed'),
+(12, '2025-05-26 15:55:38', 94.08, NULL, 0.00, 10.08, 'Cash', 200.00, 0.00, 1, NULL, 'completed'),
+(13, '2025-05-26 15:57:34', 94.08, NULL, 0.00, 10.08, 'Cash', 100.00, 0.00, 1, NULL, 'completed'),
+(14, '2025-05-26 16:11:15', 84.00, NULL, 0.00, 0.00, 'Cash', NULL, NULL, 1, NULL, 'completed'),
+(15, '2025-05-26 16:31:40', 84.00, NULL, 0.00, 0.00, 'Cash', 200.00, 116.00, 1, NULL, 'completed'),
+(16, '2025-05-26 16:32:33', 9.80, NULL, 0.00, 0.00, 'Cash', 100.00, 90.20, 1, NULL, 'completed'),
+(17, '2025-05-26 16:33:08', 9.80, NULL, 0.00, 0.00, 'Cash', 100.00, 90.20, 1, NULL, 'completed'),
+(18, '2025-05-26 16:45:44', 9.80, NULL, 0.00, 1.05, 'Cash', 10.00, 0.20, 1, NULL, 'completed'),
+(19, '2025-05-26 16:46:26', 9.80, NULL, 0.00, 1.05, 'Cash', 10.00, 0.20, 1, NULL, 'completed'),
+(20, '2025-05-26 16:50:02', 9.80, NULL, 0.00, 1.05, 'Cash', 10.00, 0.20, 1, NULL, 'completed'),
+(21, '2025-05-26 16:50:23', 9.80, NULL, 0.00, 1.05, 'Cash', 10.00, 0.20, 1, NULL, 'completed'),
+(22, '2025-05-26 17:00:33', 9.80, NULL, 0.00, 1.05, 'Cash', 20.00, 10.20, 1, NULL, 'completed'),
+(23, '2025-05-26 17:01:07', 9.80, NULL, 0.00, 1.05, 'Cash', 20.00, 10.20, 1, NULL, 'completed'),
+(24, '2025-05-26 17:11:10', 19.60, NULL, 0.00, 2.10, 'Cash', 20.00, 0.40, 1, NULL, 'completed'),
+(25, '2025-05-26 17:17:01', 19.60, NULL, 0.00, 2.10, 'Cash', 100.00, 80.40, 1, NULL, 'completed'),
+(26, '2025-05-26 17:22:01', 19.60, NULL, 0.00, 2.10, 'Cash', 100.00, 80.40, 1, NULL, 'completed'),
+(27, '2025-05-26 17:23:14', 19.60, NULL, 0.00, 2.10, 'Cash', 20.00, 0.40, 1, NULL, 'completed'),
+(28, '2025-05-26 17:24:36', 29.40, NULL, 0.00, 3.15, 'Cash', 200.00, 170.60, 1, NULL, 'completed'),
+(29, '2025-05-26 17:30:25', 19.60, NULL, 0.00, 2.10, 'Cash', 100.00, 80.40, 1, NULL, 'completed'),
+(30, '2025-05-26 17:41:39', 19.60, NULL, 0.00, 2.10, 'Cash', 50.00, 30.40, 1, NULL, 'completed'),
+(31, '2025-05-26 17:45:35', 19.60, NULL, 0.00, 2.10, 'Cash', 50.00, 30.40, 1, NULL, 'completed'),
+(32, '2025-05-26 17:49:00', 19.60, NULL, 0.00, 2.10, 'Cash', 100.00, 80.40, 1, NULL, 'completed'),
+(33, '2025-05-26 17:54:18', 29.40, NULL, 0.00, 3.15, 'Cash', 200.00, 170.60, 1, NULL, 'completed'),
+(34, '2025-05-26 18:23:03', 168.00, NULL, 0.00, 18.00, 'Cash', 200.00, 32.00, 1, NULL, 'completed'),
+(35, '2025-05-27 14:11:23', 1344.00, NULL, 0.00, 144.00, 'Cash', 2000.00, 656.00, 1, NULL, 'completed'),
+(36, '2025-05-27 14:39:55', 33.60, NULL, 0.00, 3.60, 'Cash', 50.00, 16.40, 1, NULL, 'completed'),
+(37, '2025-05-28 11:06:11', 19.60, NULL, 0.00, 2.10, 'Cash', 50.00, 30.40, 1, NULL, 'completed'),
+(38, '2025-05-28 11:08:04', 1344.00, NULL, 0.00, 144.00, 'Cash', 2000.00, 656.00, 2, NULL, 'completed'),
+(39, '2025-05-28 13:09:03', 84.00, NULL, 0.00, 9.00, 'Cash', 100.00, 16.00, 1, NULL, 'completed');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `sale_items`
+--
+
+CREATE TABLE `sale_items` (
+  `id` int(11) NOT NULL,
+  `sale_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `price_at_sale` decimal(10,2) NOT NULL,
+  `subtotal` decimal(10,2) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `sale_items`
+--
+
+INSERT INTO `sale_items` (`id`, `sale_id`, `product_id`, `quantity`, `price_at_sale`, `subtotal`) VALUES
+(2, 3, 7, 1, 75.00, 75.00),
+(3, 4, 7, 1, 75.00, 75.00),
+(4, 5, 4, 1, 8.75, 8.75),
+(5, 6, 10, 1, 30.00, 30.00),
+(6, 7, 6, 10, 35.99, 359.90),
+(7, 8, 7, 3, 75.00, 225.00),
+(8, 9, 7, 5, 75.00, 375.00),
+(9, 10, 7, 5, 75.00, 375.00),
+(10, 11, 7, 4, 75.00, 300.00),
+(11, 12, 7, 1, 75.00, 75.00),
+(12, 13, 7, 1, 75.00, 75.00),
+(13, 14, 7, 1, 75.00, 75.00),
+(14, 15, 7, 1, 75.00, 75.00),
+(15, 16, 4, 1, 8.75, 8.75),
+(16, 17, 4, 1, 8.75, 8.75),
+(17, 18, 4, 1, 8.75, 8.75),
+(18, 19, 4, 1, 8.75, 8.75),
+(19, 20, 4, 1, 8.75, 8.75),
+(20, 21, 4, 1, 8.75, 8.75),
+(21, 22, 4, 1, 8.75, 8.75),
+(22, 23, 4, 1, 8.75, 8.75),
+(23, 24, 4, 2, 8.75, 17.50),
+(24, 25, 4, 2, 8.75, 17.50),
+(25, 26, 4, 2, 8.75, 17.50),
+(26, 27, 4, 2, 8.75, 17.50),
+(27, 28, 4, 3, 8.75, 26.25),
+(28, 29, 4, 2, 8.75, 17.50),
+(29, 30, 4, 2, 8.75, 17.50),
+(30, 31, 4, 2, 8.75, 17.50),
+(31, 32, 4, 2, 8.75, 17.50),
+(32, 33, 4, 3, 8.75, 26.25),
+(33, 34, 7, 2, 75.00, 150.00),
+(34, 35, 1, 1, 1200.00, 1200.00),
+(35, 36, 10, 1, 30.00, 30.00),
+(36, 37, 4, 2, 8.75, 17.50),
+(37, 38, 1, 1, 1200.00, 1200.00),
+(38, 39, 7, 1, 75.00, 75.00);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `stock_adjustments`
+--
+
+CREATE TABLE `stock_adjustments` (
+  `id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `type` varchar(20) NOT NULL,
+  `quantity_change` int(11) NOT NULL,
+  `reason` text DEFAULT NULL,
+  `adjusted_by_user_id` int(11) NOT NULL,
+  `adjustment_date` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `suppliers`
+--
+
+CREATE TABLE `suppliers` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `contact_person` varchar(100) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `address` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `suppliers`
+--
+
+INSERT INTO `suppliers` (`id`, `name`, `contact_person`, `phone`, `email`, `address`) VALUES
+(1, 'Ranel Dahil', 'Ranel Dahil', '', '', 'Taytay, Danao City, Cebu'),
+(2, 'Ramil Dondon', 'Ramil Dondon', '09815697578', '', 'Taytay, Danao City, Cebu');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `users`
+--
+
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL,
+  `username` varchar(50) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `role` varchar(20) DEFAULT 'cashier',
+  `created_at` datetime DEFAULT current_timestamp(),
+  `last_login` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `users`
+--
+
+INSERT INTO `users` (`id`, `username`, `email`, `password_hash`, `role`, `created_at`, `last_login`) VALUES
+(1, 'admin', NULL, '$2y$10$glqmcJ6BnfuNaE7zYLg0aubFQjMTfeEB4ehjSyRgTbgr/YYmmsEXy', 'admin', '2025-05-26 09:35:33', '2025-05-28 11:10:22'),
+(2, 'Pero', 'cruspero@gmail.com', '$2y$10$s3IrZsal1bu6yfYIcCeyVeISQcnEUO9R1xNrCuhLLl6U0XUoq6R.e', 'cashier', '2025-05-27 14:47:36', '2025-05-28 11:06:59');
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `categories`
+--
+ALTER TABLE `categories`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `name` (`name`);
+
+--
+-- Indexes for table `customers`
+--
+ALTER TABLE `customers`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `products`
+--
+ALTER TABLE `products`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `barcode` (`barcode`),
+  ADD KEY `category_id` (`category_id`),
+  ADD KEY `supplier_id` (`supplier_id`);
+
+--
+-- Indexes for table `sales`
+--
 ALTER TABLE `sales`
-ADD COLUMN `cash_received` DECIMAL(10,2) NULL AFTER `payment_method`,
-ADD COLUMN `change_due` DECIMAL(10,2) NULL AFTER `cash_received`;
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `cashier_id` (`cashier_id`),
+  ADD KEY `customer_id` (`customer_id`),
+  ADD KEY `fk_sales_user_id` (`user_id`);
+
+--
+-- Indexes for table `sale_items`
+--
+ALTER TABLE `sale_items`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `sale_id` (`sale_id`),
+  ADD KEY `product_id` (`product_id`);
+
+--
+-- Indexes for table `stock_adjustments`
+--
+ALTER TABLE `stock_adjustments`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `product_id` (`product_id`),
+  ADD KEY `adjusted_by_user_id` (`adjusted_by_user_id`);
+
+--
+-- Indexes for table `suppliers`
+--
+ALTER TABLE `suppliers`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `name` (`name`);
+
+--
+-- Indexes for table `users`
+--
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `username` (`username`),
+  ADD UNIQUE KEY `email` (`email`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `categories`
+--
+ALTER TABLE `categories`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- AUTO_INCREMENT for table `customers`
+--
+ALTER TABLE `customers`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `products`
+--
+ALTER TABLE `products`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+
+--
+-- AUTO_INCREMENT for table `sales`
+--
+ALTER TABLE `sales`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
+
+--
+-- AUTO_INCREMENT for table `sale_items`
+--
+ALTER TABLE `sale_items`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
+
+--
+-- AUTO_INCREMENT for table `stock_adjustments`
+--
+ALTER TABLE `stock_adjustments`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `suppliers`
+--
+ALTER TABLE `suppliers`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `users`
+--
+ALTER TABLE `users`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `products`
+--
+ALTER TABLE `products`
+  ADD CONSTRAINT `products_ibfk_1` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `products_ibfk_2` FOREIGN KEY (`supplier_id`) REFERENCES `suppliers` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `sales`
+--
+ALTER TABLE `sales`
+  ADD CONSTRAINT `fk_sales_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
+  ADD CONSTRAINT `sales_ibfk_1` FOREIGN KEY (`cashier_id`) REFERENCES `users` (`id`),
+  ADD CONSTRAINT `sales_ibfk_2` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `sale_items`
+--
+ALTER TABLE `sale_items`
+  ADD CONSTRAINT `sale_items_ibfk_1` FOREIGN KEY (`sale_id`) REFERENCES `sales` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `sale_items_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`);
+
+--
+-- Constraints for table `stock_adjustments`
+--
+ALTER TABLE `stock_adjustments`
+  ADD CONSTRAINT `stock_adjustments_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`),
+  ADD CONSTRAINT `stock_adjustments_ibfk_2` FOREIGN KEY (`adjusted_by_user_id`) REFERENCES `users` (`id`);
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
