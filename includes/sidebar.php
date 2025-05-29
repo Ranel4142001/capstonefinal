@@ -18,16 +18,30 @@ $base_url_path = '/capstonefinal'; // Adjust this if 'capstonefinal' is not dire
             <ul class="collapse list-unstyled" id="inventoryControlSubmenu">
                 <li>
                     <a href="<?php echo $base_url_path; ?>/views/reports/add_stocks.php" class="sidebar-link submenu-link">
+<<<<<<< HEAD
                         <i class="fas fa-boxes"></i> Add Stocks
                     </a>
                 </li>
                 
+=======
+                        <i class="fas fa-boxes"></i> Add New Stocks
+                    </a>
+                </li>
+>>>>>>> 5c836252c639a910d545c22323eb3ef1ad3b5bfc
                 <li>
                     <a href="<?php echo $base_url_path; ?>/views/categories.php" class="sidebar-link submenu-link">
                         <i class="fas fa-tags"></i> Add Categories
                     </a>
                 </li>
+<<<<<<< HEAD
                
+=======
+                <li>
+                    <a href="<?php echo $base_url_path; ?>/views/reports/stock_report.php" class="sidebar-link submenu-link">
+                        <i class="fas fa-boxes"></i> Current Stock Levels
+                    </a>
+                </li>
+>>>>>>> 5c836252c639a910d545c22323eb3ef1ad3b5bfc
             </ul>
         </li>
 
@@ -36,7 +50,10 @@ $base_url_path = '/capstonefinal'; // Adjust this if 'capstonefinal' is not dire
                 <i class="fas fa-box-open"></i> Manage Products
             </a>
             <ul class="collapse list-unstyled" id="manageProductsSubmenu">
+<<<<<<< HEAD
                 
+=======
+>>>>>>> 5c836252c639a910d545c22323eb3ef1ad3b5bfc
                 <li>
                     <a href="<?php echo $base_url_path; ?>/views/inventory.php" class="sidebar-link submenu-link">
                         <i class="fas fa-boxes"></i> Current Products
@@ -50,9 +67,14 @@ $base_url_path = '/capstonefinal'; // Adjust this if 'capstonefinal' is not dire
                 </li>
             </ul>
         </li>
+<<<<<<< HEAD
             
          <li class="menu-heading">Reports</li>
         
+=======
+
+
+>>>>>>> 5c836252c639a910d545c22323eb3ef1ad3b5bfc
         <li class="sidebar-dropdown">
             <a href="#salesReportsSubmenu" data-bs-toggle="collapse" aria-expanded="false" class="sidebar-link dropdown-toggle">
                 <i class="fas fa-chart-line"></i> Sales Reports
@@ -71,6 +93,7 @@ $base_url_path = '/capstonefinal'; // Adjust this if 'capstonefinal' is not dire
             </ul>
         </li>
 
+<<<<<<< HEAD
          <li>
         <a href="<?php echo $base_url_path; ?>/views/reports/stock_report.php" class="sidebar-link submenu-link">
         <i class="fas fa-boxes"></i>Stock Reports
@@ -80,6 +103,9 @@ $base_url_path = '/capstonefinal'; // Adjust this if 'capstonefinal' is not dire
           <li class="menu-heading">Administration</li>
 
 
+=======
+      
+>>>>>>> 5c836252c639a910d545c22323eb3ef1ad3b5bfc
         <li><a href="<?php echo $base_url_path; ?>/views/suppliers.php" class="sidebar-link"><i class="fas fa-truck"></i> Suppliers</a></li>
         <li><a href="<?php echo $base_url_path; ?>/views/user_management.php" class="sidebar-link"><i class="fas fa-users"></i> User Management</a></li>
 
