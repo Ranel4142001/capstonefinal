@@ -34,6 +34,11 @@ $base_url_path = '/capstonefinal'; // Adjust this if 'capstonefinal' is not dire
                     </a>
                 </li>
                 <li>
+                    <a href="<?php echo $base_url_path; ?>/views/categories.php" class="sidebar-link submenu-link">
+                        <i class="fas fa-tags"></i> Add Categories
+                    </a>
+                </li>
+                <li>
                     <a href="<?php echo $base_url_path; ?>/views/reports/stock_report.php" class="sidebar-link submenu-link">
                         <i class="fas fa-boxes"></i> Current Stock Levels
                     </a>
@@ -54,11 +59,6 @@ $base_url_path = '/capstonefinal'; // Adjust this if 'capstonefinal' is not dire
                 <li>
                     <a href="<?php echo $base_url_path; ?>/views/add_product.php" class="sidebar-link submenu-link">
                         <i class="fas fa-plus-square"></i> Add Product
-                    </a>
-                </li>
-                <li>
-                    <a href="<?php echo $base_url_path; ?>/views/categories.php" class="sidebar-link submenu-link">
-                        <i class="fas fa-tags"></i> Add Categories
                     </a>
                 </li>
             </ul>

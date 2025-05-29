@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 28, 2025 at 07:11 AM
+-- Generation Time: May 29, 2025 at 09:32 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -43,7 +43,8 @@ INSERT INTO `categories` (`id`, `name`, `description`) VALUES
 (3, 'Food & Beverage', NULL),
 (4, 'Books', NULL),
 (5, 'Home Goods', NULL),
-(6, 'drinks', 'coca cola');
+(6, 'drinks', 'coca cola'),
+(8, 'Dondon', 'walaaa');
 
 -- --------------------------------------------------------
 
@@ -87,17 +88,19 @@ CREATE TABLE `products` (
 --
 
 INSERT INTO `products` (`id`, `barcode`, `name`, `description`, `price`, `cost_price`, `stock_quantity`, `category_id`, `supplier_id`, `brand`, `is_active`, `created_at`, `updated_at`) VALUES
-(1, '123456789012', 'Laptop Pro', 'High-performance laptop for professionals', 1200.00, 900.00, 13, 1, NULL, NULL, 1, '2025-05-26 11:48:14', '2025-05-28 11:08:04'),
-(2, '987654321098', 'Wireless Mouse', 'Ergonomic wireless mouse', 25.50, 15.00, 50, 1, NULL, NULL, 1, '2025-05-26 11:48:14', '2025-05-26 11:48:14'),
-(3, '112233445566', 'T-Shirt (Medium)', 'Comfortable cotton t-shirt', 15.00, 7.50, 100, 2, NULL, NULL, 1, '2025-05-26 11:48:14', '2025-05-26 11:48:14'),
-(4, '223344556677', 'Coffee Beans (250g)', 'Freshly roasted arabica beans', 8.75, 4.00, 7, 3, NULL, NULL, 1, '2025-05-26 11:48:14', '2025-05-28 12:25:11'),
-(5, '334455667788', 'The Great Novel', 'A compelling fiction novel', 20.00, 10.00, 30, 4, NULL, NULL, 1, '2025-05-26 11:48:14', '2025-05-26 11:48:14'),
-(6, '445566778899', 'Desk Lamp', 'Modern LED desk lamp', 35.99, 20.00, 10, 5, NULL, NULL, 1, '2025-05-26 11:48:14', '2025-05-26 15:18:19'),
-(7, '556677889900', 'Bluetooth Speaker', 'Portable speaker with clear sound', 75.00, 40.00, 9, 1, NULL, NULL, 1, '2025-05-26 11:48:14', '2025-05-28 13:09:03'),
-(8, '667788990011', 'Jeans (Size 32)', 'Slim fit denim jeans', 45.00, 25.00, 60, 2, NULL, NULL, 1, '2025-05-26 11:48:14', '2025-05-26 11:48:14'),
+(1, '123456789012', 'Laptop Pro', 'High-performance laptop for professionals', 1200.00, 900.00, 120, 1, NULL, NULL, 1, '2025-05-26 11:48:14', '2025-05-29 14:48:37'),
+(2, '987654321098', 'Wireless Mouse', 'Ergonomic wireless mouse', 25.50, 15.00, 100, 1, NULL, NULL, 1, '2025-05-26 11:48:14', '2025-05-29 14:58:59'),
+(3, '112233445566', 'T-Shirt (Medium)', 'Comfortable cotton t-shirt', 15.00, 7.50, 98, 2, NULL, NULL, 1, '2025-05-26 11:48:14', '2025-05-29 15:26:29'),
+(4, '223344556677', 'Coffee Beans (250g)', 'Freshly roasted arabica beans', 8.75, 4.00, 107, 3, NULL, NULL, 1, '2025-05-26 11:48:14', '2025-05-29 14:31:36'),
+(5, '334455667788', 'The Great Novel', 'A compelling fiction novel', 20.00, 10.00, 100, 4, NULL, NULL, 1, '2025-05-26 11:48:14', '2025-05-29 14:41:29'),
+(6, '445566778899', 'Desk Lamp', 'Modern LED desk lamp', 35.99, 20.00, 108, 5, NULL, NULL, 1, '2025-05-26 11:48:14', '2025-05-29 14:33:14'),
+(7, '556677889900', 'Bluetooth Speaker', 'Portable speaker with clear sound', 75.00, 40.00, 110, 1, NULL, NULL, 1, '2025-05-26 11:48:14', '2025-05-29 13:17:02'),
+(8, '667788990011', 'Jeans (Size 32)', 'Slim fit denim jeans', 45.00, 25.00, 120, 2, NULL, NULL, 1, '2025-05-26 11:48:14', '2025-05-29 14:46:57'),
 (9, '778899001122', 'Energy Drink (Can)', 'Refreshing energy boost', 2.50, 1.00, 200, 3, NULL, NULL, 1, '2025-05-26 11:48:14', '2025-05-26 11:48:14'),
-(10, '889900112233', 'Cookbook: Italian', 'Authentic Italian recipes', 30.00, 15.00, 8, 4, NULL, NULL, 1, '2025-05-26 11:48:14', '2025-05-27 14:39:55'),
-(11, '990011223344', 'Yoga Mat', 'Non-slip yoga mat', 22.00, 10.00, 35, 5, NULL, NULL, 1, '2025-05-26 11:48:14', '2025-05-26 11:48:14');
+(10, '889900112233', 'Cookbook: Italian', 'Authentic Italian recipes', 30.00, 15.00, 108, 4, NULL, NULL, 1, '2025-05-26 11:48:14', '2025-05-29 14:37:19'),
+(11, '990011223344', 'Yoga Mat', 'Non-slip yoga mat', 22.00, 10.00, 100, 5, NULL, NULL, 1, '2025-05-26 11:48:14', '2025-05-29 15:00:25'),
+(14, '12345678', 'ramil', NULL, 50.00, 40.00, 300, 4, NULL, 'wala', 1, '2025-05-29 12:26:29', '2025-05-29 14:36:46'),
+(15, '12356', 'ranel', NULL, 50.00, 30.00, 300, 4, NULL, 'wala', 1, '2025-05-29 12:33:37', '2025-05-29 13:28:43');
 
 -- --------------------------------------------------------
 
@@ -161,7 +164,9 @@ INSERT INTO `sales` (`id`, `sale_date`, `total_amount`, `user_id`, `discount_amo
 (36, '2025-05-27 14:39:55', 33.60, NULL, 0.00, 3.60, 'Cash', 50.00, 16.40, 1, NULL, 'completed'),
 (37, '2025-05-28 11:06:11', 19.60, NULL, 0.00, 2.10, 'Cash', 50.00, 30.40, 1, NULL, 'completed'),
 (38, '2025-05-28 11:08:04', 1344.00, NULL, 0.00, 144.00, 'Cash', 2000.00, 656.00, 2, NULL, 'completed'),
-(39, '2025-05-28 13:09:03', 84.00, NULL, 0.00, 9.00, 'Cash', 100.00, 16.00, 1, NULL, 'completed');
+(39, '2025-05-28 13:09:03', 84.00, NULL, 0.00, 9.00, 'Cash', 100.00, 16.00, 1, NULL, 'completed'),
+(40, '2025-05-29 09:58:21', 80.62, NULL, 0.00, 8.64, 'Cash', 100.00, 19.38, 1, NULL, 'completed'),
+(41, '2025-05-29 15:26:29', 33.60, NULL, 0.00, 3.60, 'Cash', 100.00, 66.40, 1, NULL, 'completed');
 
 -- --------------------------------------------------------
 
@@ -219,23 +224,42 @@ INSERT INTO `sale_items` (`id`, `sale_id`, `product_id`, `quantity`, `price_at_s
 (35, 36, 10, 1, 30.00, 30.00),
 (36, 37, 4, 2, 8.75, 17.50),
 (37, 38, 1, 1, 1200.00, 1200.00),
-(38, 39, 7, 1, 75.00, 75.00);
+(38, 39, 7, 1, 75.00, 75.00),
+(39, 40, 6, 2, 35.99, 71.98),
+(40, 41, 3, 2, 15.00, 30.00);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `stock_adjustments`
+-- Table structure for table `stock_history`
 --
 
-CREATE TABLE `stock_adjustments` (
+CREATE TABLE `stock_history` (
   `id` int(11) NOT NULL,
   `product_id` int(11) NOT NULL,
-  `type` varchar(20) NOT NULL,
   `quantity_change` int(11) NOT NULL,
-  `reason` text DEFAULT NULL,
-  `adjusted_by_user_id` int(11) NOT NULL,
-  `adjustment_date` datetime DEFAULT current_timestamp()
+  `current_quantity_after_change` int(11) NOT NULL,
+  `change_type` enum('purchase_in','sale_out','adjustment_in','adjustment_out','initial_load') NOT NULL,
+  `change_date` datetime DEFAULT current_timestamp(),
+  `user_id` int(11) DEFAULT NULL,
+  `description` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `stock_history`
+--
+
+INSERT INTO `stock_history` (`id`, `product_id`, `quantity_change`, `current_quantity_after_change`, `change_type`, `change_date`, `user_id`, `description`) VALUES
+(1, 14, 200, 300, 'purchase_in', '2025-05-29 14:36:46', 1, 'Stock added manually (via Add Stock form) for product ID: 14'),
+(2, 10, 100, 108, 'purchase_in', '2025-05-29 14:37:19', 1, 'Stock added manually (via Add Stock form) for product ID: 10'),
+(3, 5, 70, 100, 'purchase_in', '2025-05-29 14:41:29', 1, 'Stock added manually (via Add Stock form) for product ID: 5'),
+(4, 1, 50, 63, 'purchase_in', '2025-05-29 14:42:36', 1, 'Stock added manually (via Add Stock form) for product ID: 1'),
+(5, 1, 50, 113, 'purchase_in', '2025-05-29 14:43:45', 1, 'Stock added manually (via Add Stock form) for product ID: 1'),
+(6, 8, 40, 100, 'purchase_in', '2025-05-29 14:45:57', 1, 'Stock added manually (via Add Stock form) for product ID: 8'),
+(7, 2, 50, 100, 'purchase_in', '2025-05-29 14:58:59', 1, 'Stock added manually (via Add Stock form) for product ID: 2'),
+(8, 11, 35, 70, 'adjustment_in', '2025-05-29 14:59:36', 1, 'Manual stock increase via product edit'),
+(9, 11, 30, 100, 'adjustment_in', '2025-05-29 15:00:25', 1, 'Manual stock increase via product edit'),
+(10, 3, -2, 98, 'sale_out', '2025-05-29 15:26:29', 1, 'Sale (Order ID: 41)');
 
 -- --------------------------------------------------------
 
@@ -281,7 +305,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `email`, `password_hash`, `role`, `created_at`, `last_login`) VALUES
-(1, 'admin', NULL, '$2y$10$glqmcJ6BnfuNaE7zYLg0aubFQjMTfeEB4ehjSyRgTbgr/YYmmsEXy', 'admin', '2025-05-26 09:35:33', '2025-05-28 11:10:22'),
+(1, 'admin', NULL, '$2y$10$glqmcJ6BnfuNaE7zYLg0aubFQjMTfeEB4ehjSyRgTbgr/YYmmsEXy', 'admin', '2025-05-26 09:35:33', '2025-05-29 13:06:43'),
 (2, 'Pero', 'cruspero@gmail.com', '$2y$10$s3IrZsal1bu6yfYIcCeyVeISQcnEUO9R1xNrCuhLLl6U0XUoq6R.e', 'cashier', '2025-05-27 14:47:36', '2025-05-28 11:06:59');
 
 --
@@ -328,12 +352,13 @@ ALTER TABLE `sale_items`
   ADD KEY `product_id` (`product_id`);
 
 --
--- Indexes for table `stock_adjustments`
+-- Indexes for table `stock_history`
 --
-ALTER TABLE `stock_adjustments`
+ALTER TABLE `stock_history`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `product_id` (`product_id`),
-  ADD KEY `adjusted_by_user_id` (`adjusted_by_user_id`);
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `idx_stock_history_product_id` (`product_id`),
+  ADD KEY `idx_stock_history_change_date` (`change_date`);
 
 --
 -- Indexes for table `suppliers`
@@ -358,7 +383,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `categories`
 --
 ALTER TABLE `categories`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `customers`
@@ -370,25 +395,25 @@ ALTER TABLE `customers`
 -- AUTO_INCREMENT for table `products`
 --
 ALTER TABLE `products`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `sales`
 --
 ALTER TABLE `sales`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
 
 --
 -- AUTO_INCREMENT for table `sale_items`
 --
 ALTER TABLE `sale_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
 
 --
--- AUTO_INCREMENT for table `stock_adjustments`
+-- AUTO_INCREMENT for table `stock_history`
 --
-ALTER TABLE `stock_adjustments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE `stock_history`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `suppliers`
@@ -429,11 +454,11 @@ ALTER TABLE `sale_items`
   ADD CONSTRAINT `sale_items_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`);
 
 --
--- Constraints for table `stock_adjustments`
+-- Constraints for table `stock_history`
 --
-ALTER TABLE `stock_adjustments`
-  ADD CONSTRAINT `stock_adjustments_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`),
-  ADD CONSTRAINT `stock_adjustments_ibfk_2` FOREIGN KEY (`adjusted_by_user_id`) REFERENCES `users` (`id`);
+ALTER TABLE `stock_history`
+  ADD CONSTRAINT `stock_history_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `stock_history_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
