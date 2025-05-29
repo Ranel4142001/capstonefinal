@@ -145,6 +145,24 @@ body {
     /* Standard Bootstrap padding */
     padding-bottom: 0.5rem;
     /* Standard Bootstrap padding */
+    background-color: #2c3e50;
+    /* Changed to match sidebar background */
+    color: #ecf0f1;
+    /* Added to ensure text is visible on the dark background */
+}
+
+/* Add styles for text within the navbar to ensure visibility */
+.custom-navbar-top .navbar-brand,
+.custom-navbar-top .nav-link,
+.custom-navbar-top .nav-item .text-white {
+    /* Assuming logout text is also white or needs to be */
+    color: #ecf0f1 !important;
+    /* Force light color for text */
+}
+
+.custom-navbar-top .nav-link:hover {
+    color: #1abc9c !important;
+    /* A subtle hover effect for navbar links */
 }
 
 .dashboard-page-content {
@@ -474,6 +492,7 @@ thead {
 /* Page breaks for large tables */
 table {
     page-break-after: auto;
+
 }
 
 tr {

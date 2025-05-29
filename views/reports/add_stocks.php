@@ -199,7 +199,7 @@ include '../../includes/header.php'; // Includes your header with Bootstrap and 
         </nav>
 
         <div class="container-fluid dashboard-page-content mt-5 pt-3">
-            <h2 class="mb-4">Add Stock to Existing Product</h2>
+    
 
             <?php
             // The PHP block for displaying the alert from $message and $message_type
