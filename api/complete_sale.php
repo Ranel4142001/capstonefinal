@@ -78,7 +78,7 @@ try {
         throw new Exception("Failed to create sale record.");
     }
 
-    // 2. Insert into sale_items table and update product stock
+    // 2. Insert into sale_items table and update product stock, and log stock history
     $stmt_sale_item = $pdo->prepare(
         "INSERT INTO sale_items (sale_id, product_id, quantity, price_at_sale, subtotal)
         VALUES (?, ?, ?, ?, ?)"
@@ -86,20 +86,48 @@ try {
     $stmt_update_stock = $pdo->prepare(
         "UPDATE products SET stock_quantity = stock_quantity - ? WHERE id = ? AND stock_quantity >= ?"
     );
+    // Prepare statement to get the current stock quantity after update
+    $stmt_get_current_stock = $pdo->prepare(
+        "SELECT stock_quantity FROM products WHERE id = ?"
+    );
+    // Prepare statement to log stock history
+    $stmt_log_stock_history = $pdo->prepare(
+        "INSERT INTO stock_history (product_id, quantity_change, current_quantity_after_change, change_type, change_date, user_id, description)
+        VALUES (?, ?, ?, ?, NOW(), ?, ?)"
+    );
 
     foreach ($cart as $item) {
         $product_id = $item['id'];
-        $quantity = $item['quantity'];
+        $quantity_sold = $item['quantity']; // Renamed for clarity: quantity sold
         $price_at_sale = $item['price'];
-        $subtotal = $price_at_sale * $quantity;
+        $subtotal = $price_at_sale * $quantity_sold;
 
-        $stmt_sale_item->execute([$sale_id, $product_id, $quantity, $price_at_sale, $subtotal]);
+        // Insert into sale_items
+        $stmt_sale_item->execute([$sale_id, $product_id, $quantity_sold, $price_at_sale, $subtotal]);
 
-        $stmt_update_stock->execute([$quantity, $product_id, $quantity]);
+        // Update product stock
+        $stmt_update_stock->execute([$quantity_sold, $product_id, $quantity_sold]);
 
         if ($stmt_update_stock->rowCount() === 0) {
             throw new Exception("Insufficient stock or product not found for product ID: $product_id. Transaction aborted.");
         }
+
+        // Get the current stock quantity AFTER the update
+        $stmt_get_current_stock->execute([$product_id]);
+        $current_stock_after_sale = $stmt_get_current_stock->fetchColumn();
+
+        // Log the stock change in stock_history
+        $quantity_change_for_log = -$quantity_sold; // Negative for stock reduction
+        $change_type = 'sale_out';
+        $description = "Sale (Order ID: $sale_id)";
+        $stmt_log_stock_history->execute([
+            $product_id,
+            $quantity_change_for_log,
+            $current_stock_after_sale,
+            $change_type,
+            $cashier_id,
+            $description
+        ]);
     }
 
     $pdo->commit();

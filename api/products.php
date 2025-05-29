@@ -148,12 +148,12 @@ function handlePutRequest($pdo) {
 
         // --- Step 2: Update the product in the products table ---
         $stmt = $pdo->prepare("UPDATE products SET
-                                name = ?,
-                                category_id = ?,
-                                price = ?,
-                                stock_quantity = ?,
-                                barcode = ?
-                            WHERE id = ?");
+                                    name = ?,
+                                    category_id = ?,
+                                    price = ?,
+                                    stock_quantity = ?,
+                                    barcode = ?
+                                WHERE id = ?");
 
         $stmt->execute([$name, $category_id, $price, $new_stock_quantity, $barcode, $product_id]);
 
@@ -175,14 +175,15 @@ function handlePutRequest($pdo) {
                 
                 // Only log if there was an actual change and a type is set
                 if (!empty($change_type)) {
-                    $stmtHistory = $pdo->prepare("INSERT INTO stock_history (product_id, change_type, quantity_change, new_stock_quantity, user_id, notes) VALUES (?, ?, ?, ?, ?, ?)");
+                    // Corrected column name: new_stock_quantity changed to current_quantity_after_change
+                    $stmtHistory = $pdo->prepare("INSERT INTO stock_history (product_id, change_type, quantity_change, current_quantity_after_change, user_id, description) VALUES (?, ?, ?, ?, ?, ?)");
                     $stmtHistory->execute([
                         $product_id,
                         $change_type,
                         $quantity_change,
-                        $new_stock_quantity,
+                        $new_stock_quantity, // This variable holds the correct value
                         $_SESSION['user_id'] ?? null, // Use session user_id if logged in
-                        $notes
+                        $notes // Using 'description' column as per stock_history table
                     ]);
                 }
             }
