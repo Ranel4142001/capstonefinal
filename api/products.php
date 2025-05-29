@@ -13,6 +13,8 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+session_start(); // Start session to access user_id for logging
+
 require_once '../config/db.php'; // Your database connection using PDO
 
 $method = $_SERVER['REQUEST_METHOD'];
@@ -27,10 +29,10 @@ switch ($method) {
         echo json_encode(array("message" => "POST method not implemented."));
         break;
     case 'PUT':
-        handlePutRequest($pdo); // <-- UNCOMMENT THIS LINE AND DEFINE THE FUNCTION
+        handlePutRequest($pdo); // <-- This function now includes stock history logging
         break;
     case 'DELETE':
-        handleDeleteRequest($pdo); // <-- UNCOMMENT THIS LINE AND DEFINE THE FUNCTION (if it's commented out in your file)
+        handleDeleteRequest($pdo);
         break;
     default:
         http_response_code(405); // Method Not Allowed
@@ -103,7 +105,7 @@ function handleGetRequest($pdo) {
     }
 }
 
-// --- DEFINE handlePutRequest FUNCTION ---
+// --- DEFINE handlePutRequest FUNCTION (UPDATED WITH STOCK HISTORY LOGGING) ---
 function handlePutRequest($pdo) {
     $input = file_get_contents('php://input');
     $data = json_decode($input, true);
@@ -124,13 +126,27 @@ function handlePutRequest($pdo) {
     }
 
     try {
-        $id = $data['id'];
+        $product_id = $data['id'];
         $name = $data['name'];
         $category_id = $data['category_id'];
         $price = $data['price'];
-        $stock_quantity = $data['stock_quantity'];
+        $new_stock_quantity = $data['stock_quantity']; // This is the stock quantity AFTER the update
         $barcode = $data['barcode'] ?? null;
 
+        // --- Step 1: Get the current stock quantity BEFORE the update ---
+        $stmt = $pdo->prepare("SELECT stock_quantity FROM products WHERE id = ?");
+        $stmt->execute([$product_id]);
+        $current_product = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$current_product) {
+            http_response_code(404);
+            echo json_encode(array("success" => false, "message" => "Product not found."));
+            return;
+        }
+
+        $old_stock_quantity = $current_product['stock_quantity'];
+
+        // --- Step 2: Update the product in the products table ---
         $stmt = $pdo->prepare("UPDATE products SET
                                 name = ?,
                                 category_id = ?,
@@ -139,13 +155,44 @@ function handlePutRequest($pdo) {
                                 barcode = ?
                             WHERE id = ?");
 
-        $stmt->execute([$name, $category_id, $price, $stock_quantity, $barcode, $id]);
+        $stmt->execute([$name, $category_id, $price, $new_stock_quantity, $barcode, $product_id]);
 
-        if ($stmt->rowCount()) {
-            echo json_encode(['success' => true, 'message' => 'Product updated successfully.']);
+        // Check if update was successful (rowCount > 0 means a row was affected)
+        if ($stmt->rowCount() > 0) {
+            // --- Step 3: Log the change in stock_history if stock quantity has changed ---
+            if ($new_stock_quantity != $old_stock_quantity) {
+                $quantity_change = $new_stock_quantity - $old_stock_quantity; // Positive for increase, negative for decrease
+                $change_type = '';
+                $notes = '';
+
+                if ($quantity_change > 0) {
+                    $change_type = 'adjustment_in';
+                    $notes = 'Manual stock increase via product edit';
+                } elseif ($quantity_change < 0) {
+                    $change_type = 'adjustment_out';
+                    $notes = 'Manual stock decrease via product edit';
+                }
+                
+                // Only log if there was an actual change and a type is set
+                if (!empty($change_type)) {
+                    $stmtHistory = $pdo->prepare("INSERT INTO stock_history (product_id, change_type, quantity_change, new_stock_quantity, user_id, notes) VALUES (?, ?, ?, ?, ?, ?)");
+                    $stmtHistory->execute([
+                        $product_id,
+                        $change_type,
+                        $quantity_change,
+                        $new_stock_quantity,
+                        $_SESSION['user_id'] ?? null, // Use session user_id if logged in
+                        $notes
+                    ]);
+                }
+            }
+
+            http_response_code(200);
+            echo json_encode(array("success" => true, "message" => "Product updated successfully."));
         } else {
-            http_response_code(200); // Still OK, but no change occurred
-            echo json_encode(['success' => false, 'message' => 'Product not found or no changes made.']);
+            // No rows affected means either product_id didn't exist (handled above) or data was same
+            http_response_code(200); // Still 200, but inform no change
+            echo json_encode(array("success" => false, "message" => "Product not found or no changes made."));
         }
 
     } catch (PDOException $e) {

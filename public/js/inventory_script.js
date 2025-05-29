@@ -1,5 +1,3 @@
-// your_pos_project_root/public/js/inventory_script.js
-
 document.addEventListener('DOMContentLoaded', function () {
     const productTableBody = document.getElementById('productTableBody');
     const productSearch = document.getElementById('productSearch');
@@ -10,13 +8,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const productsPerPage = 10;
     let currentPage = 1;
     let totalProducts = 0;
+    let lowStockThreshold = 0; // Initialize, will be updated by API response
 
-    // Edit Modal Elements (New additions for modal functionality)
-    // Get the Bootstrap modal instance
+    // Edit Modal Elements
     const editProductModal = new bootstrap.Modal(document.getElementById('editProductModal'));
-    // Get the form inside the modal
     const editProductForm = document.getElementById('editProductForm');
-    // Get individual input fields from the modal form
     const editProductId = document.getElementById('editProductId');
     const editProductName = document.getElementById('editProductName');
     const editProductCategory = document.getElementById('editProductCategory');
@@ -32,7 +28,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const categoryId = categoryFilter.value;
         const offset = (currentPage - 1) * productsPerPage;
 
-        let url = `../api/products.php?limit=${productsPerPage}&offset=${offset}`;
+        // Ensure this path correctly points to your API endpoint for products
+        let url = `../api/inventory.php?limit=${productsPerPage}&offset=${offset}`;
         if (searchTerm) {
             url += `&search=${encodeURIComponent(searchTerm)}`;
         }
@@ -46,6 +43,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (data.success) {
                 totalProducts = data.total;
+                lowStockThreshold = data.low_stock_threshold; // Update threshold from API
                 renderProducts(data.products);
                 renderPagination();
             } else {
@@ -72,12 +70,21 @@ document.addEventListener('DOMContentLoaded', function () {
 
         products.forEach(product => {
             const row = document.createElement('tr');
+            let stockClass = '';
+            let stockDisplay = product.stock_quantity;
+
+            // Apply low stock styling and text
+            if (product.stock_quantity <= lowStockThreshold) {
+                stockClass = 'text-danger fw-bold'; // Bootstrap classes for red and bold
+                stockDisplay += ' (Low Stock)'; // Add status text
+            }
+
             row.innerHTML = `
                 <td>${product.id}</td>
                 <td>${htmlspecialchars(product.name)}</td>
                 <td>${htmlspecialchars(product.category_name || 'N/A')}</td>
                 <td>₱ ${parseFloat(product.price).toFixed(2)}</td>
-                <td>${product.stock_quantity}</td>
+                <td class="${stockClass}">${stockDisplay}</td>
                 <td>${htmlspecialchars(product.barcode || 'N/A')}</td>
                 <td>
                     <button class="btn btn-sm btn-info me-1 edit-product-btn"
@@ -98,21 +105,7 @@ document.addEventListener('DOMContentLoaded', function () {
             productTableBody.appendChild(row);
         });
 
-        // Attach event listeners for edit and delete buttons after products are displayed
-        document.querySelectorAll('.edit-product-btn').forEach(button => {
-            button.addEventListener('click', openEditModal);
-        });
-
-        document.querySelectorAll('.delete-product-btn').forEach(button => {
-            button.addEventListener('click', function () {
-                const productId = this.dataset.id;
-                // You might want to fetch the product name for a more user-friendly confirmation
-                const productName = this.closest('tr').querySelector('td:nth-child(2)').textContent;
-                if (confirm(`Are you sure you want to delete "${productName}"?`)) {
-                    deleteProduct(productId);
-                }
-            });
-        });
+        attachActionEventListeners(); // Attach event listeners after rendering products
     }
 
     // Function to render pagination controls
@@ -161,6 +154,25 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // Function to attach event listeners to dynamically added buttons
+    function attachActionEventListeners() {
+        // Attach event listeners for edit buttons
+        document.querySelectorAll('.edit-product-btn').forEach(button => {
+            button.addEventListener('click', openEditModal);
+        });
+
+        // Attach event listeners for delete buttons
+        document.querySelectorAll('.delete-product-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                const productId = this.dataset.id;
+                const productName = this.closest('tr').querySelector('td:nth-child(2)').textContent;
+                if (confirm(`Are you sure you want to delete "${productName}"?`)) {
+                    deleteProduct(productId);
+                }
+            });
+        });
+    }
+
     // Function to open the edit modal and populate its fields
     function openEditModal(event) {
         const button = event.currentTarget; // The clicked edit button
@@ -188,7 +200,6 @@ document.addEventListener('DOMContentLoaded', function () {
         event.preventDefault(); // Prevent default form submission
 
         const formData = new FormData(editProductForm);
-        const productId = formData.get('id'); // Get the product ID from the hidden input
 
         // Convert FormData to a plain JavaScript object for JSON submission
         const productData = {};
@@ -197,7 +208,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         try {
-            // Send a PUT request to your API endpoint
+            // Send a PUT request to your API endpoint (assuming products.php handles PUT)
             const response = await fetch(`../api/products.php`, {
                 method: 'PUT', // Use PUT for updating resources
                 headers: {
@@ -221,10 +232,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-
     // Function to handle product deletion
     async function deleteProduct(productId) {
         try {
+            // Send a DELETE request to your API endpoint (assuming products.php handles DELETE)
             const response = await fetch(`../api/products.php?id=${productId}`, {
                 method: 'DELETE',
                 headers: {
@@ -248,7 +259,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Helper for HTML escaping (basic)
     function htmlspecialchars(str) {
-        if (typeof str !== 'string') return str; // Return non-strings as is
+        if (typeof str !== 'string' && typeof str !== 'number') return str; // Return non-strings/numbers as is
+        str = String(str); // Ensure it's a string
         const map = {
             '&': '&amp;',
             '<': '&lt;',

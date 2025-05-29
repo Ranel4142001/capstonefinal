@@ -5,15 +5,13 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 // Include database connection
-include '../config/db.php'; 
+require_once __DIR__ . '/../config/db.php';
 
-// Set header for JSON response
 header('Content-Type: application/json');
 
-// Get the HTTP request method
-$method = $_SERVER['REQUEST_METHOD'];
+global $pdo;
 
-switch ($method) {
+switch ($_SERVER['REQUEST_METHOD']) {
     case 'GET':
         handleGetSuppliersRequest();
         break;
@@ -28,64 +26,92 @@ switch ($method) {
         break;
     default:
         echo json_encode(['success' => false, 'message' => 'Method not allowed.']);
-        http_response_code(405); // Method Not Allowed
+        http_response_code(405);
         break;
 }
 
 function handleGetSuppliersRequest() {
-    global $pdo; // Access the PDO object from db.php
+    global $pdo;
 
     $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
     $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;
-    $search = isset($_GET['search']) ? $_GET['search'] : '';
+    $search = isset($_GET['search']) ? trim($_GET['search']) : '';
 
     $sql = "SELECT id, name, contact_person, phone, email, address FROM suppliers";
     $countSql = "SELECT COUNT(*) FROM suppliers";
-    $params = [];
+
+    $queryParamsForMain = []; // Parameters for the main paginated query
+    $queryParamsForCount = []; // Parameters for the count query
 
     if (!empty($search)) {
-        $sql .= " WHERE name LIKE :search OR contact_person LIKE :search OR phone LIKE :search OR email LIKE :search OR address LIKE :search";
-        $countSql .= " WHERE name LIKE :search OR contact_person LIKE :search OR phone LIKE :search OR email LIKE :search OR address LIKE :search";
-        $params[':search'] = '%' . $search . '%';
+        $searchParamValue = '%' . $search . '%';
+        $whereConditions = [];
+        $tempSearchParams = []; // Use temporary array for building to avoid confusion
+
+        // Create unique named parameters for each LIKE clause
+        $whereConditions[] = "name LIKE :search_name";
+        $tempSearchParams[':search_name'] = $searchParamValue;
+
+        $whereConditions[] = "contact_person LIKE :search_contact";
+        $tempSearchParams[':search_contact'] = $searchParamValue;
+
+        $whereConditions[] = "phone LIKE :search_phone";
+        $tempSearchParams[':search_phone'] = $searchParamValue;
+
+        $whereConditions[] = "email LIKE :search_email";
+        $tempSearchParams[':search_email'] = $searchParamValue;
+
+        $whereConditions[] = "address LIKE :search_address";
+        $tempSearchParams[':search_address'] = $searchParamValue;
+
+        $whereClause = " WHERE " . implode(" OR ", $whereConditions);
+
+        $sql .= $whereClause;
+        $countSql .= $whereClause;
+
+        // Merge tempSearchParams into both query parameter arrays
+        $queryParamsForMain = array_merge($queryParamsForMain, $tempSearchParams);
+        $queryParamsForCount = array_merge($queryParamsForCount, $tempSearchParams);
     }
 
     $sql .= " ORDER BY name ASC LIMIT :limit OFFSET :offset";
+    $queryParamsForMain[':limit'] = $limit;
+    $queryParamsForMain[':offset'] = $offset;
 
     try {
-        // Get total count
+        // --- Debugging: Log SQL queries and parameters ---
+        error_log("SQL for count: " . $countSql);
+        error_log("Params for count: " . print_r($queryParamsForCount, true));
+        error_log("SQL for suppliers: " . $sql);
+        error_log("Params for suppliers: " . print_r($queryParamsForMain, true));
+        // --- End Debugging ---
+
+        // --- Get total count ---
         $stmtCount = $pdo->prepare($countSql);
-        foreach ($params as $key => &$val) {
-            $stmtCount->bindParam($key, $val);
-        }
-        $stmtCount->execute();
+        $stmtCount->execute($queryParamsForCount);
         $total = $stmtCount->fetchColumn();
 
-        // Get paginated suppliers
+        // --- Get paginated suppliers ---
         $stmt = $pdo->prepare($sql);
-        foreach ($params as $key => &$val) {
-            $stmt->bindParam($key, $val);
-        }
-        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
-        $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
-        $stmt->execute();
+        $stmt->execute($queryParamsForMain);
         $suppliers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         echo json_encode(['success' => true, 'suppliers' => $suppliers, 'total' => $total]);
     } catch (PDOException $e) {
-        error_log("Error fetching suppliers: " . $e->getMessage()); // Log error to server error log
+        error_log("Error fetching suppliers: " . $e->getMessage());
         echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
-        http_response_code(500); // Internal Server Error
+        http_response_code(500);
     }
 }
 
 function handleAddSupplierRequest() {
-    global $pdo; // Access the PDO object from db.php
+    global $pdo;
 
     $data = json_decode(file_get_contents('php://input'), true);
 
     if (json_last_error() !== JSON_ERROR_NONE) {
         echo json_encode(['success' => false, 'message' => 'Invalid JSON input.']);
-        http_response_code(400); // Bad Request
+        http_response_code(400);
         return;
     }
 
@@ -95,14 +121,12 @@ function handleAddSupplierRequest() {
     $email = trim($data['email'] ?? '');
     $address = trim($data['address'] ?? '');
 
-    // Basic validation
     if (empty($name)) {
         echo json_encode(['success' => false, 'message' => 'Supplier Name is required.']);
         http_response_code(400);
         return;
     }
 
-    // Prepare SQL to insert supplier
     $sql = "INSERT INTO suppliers (name, contact_person, phone, email, address) VALUES (:name, :contact_person, :phone, :email, :address)";
 
     try {
@@ -129,13 +153,13 @@ function handleAddSupplierRequest() {
 }
 
 function handleUpdateSupplierRequest() {
-    global $pdo; // Access the PDO object from db.php
+    global $pdo;
 
     $data = json_decode(file_get_contents('php://input'), true);
 
     if (json_last_error() !== JSON_ERROR_NONE) {
         echo json_encode(['success' => false, 'message' => 'Invalid JSON input.']);
-        http_response_code(400); // Bad Request
+        http_response_code(400);
         return;
     }
 
@@ -146,7 +170,6 @@ function handleUpdateSupplierRequest() {
     $email = trim($data['email'] ?? '');
     $address = trim($data['address'] ?? '');
 
-    // Basic validation
     if ($id <= 0 || empty($name)) {
         echo json_encode(['success' => false, 'message' => 'Invalid supplier ID or Name is required.']);
         http_response_code(400);
@@ -184,13 +207,10 @@ function handleUpdateSupplierRequest() {
 }
 
 function handleDeleteSupplierRequest() {
-    global $pdo; // Access the PDO object from db.php
+    global $pdo;
 
-    // For DELETE, method is typically GET with ID in query string or via JSON body
-    // We'll primarily expect it in the query string for simplicity.
     $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
-    // If ID is not in query string, try parsing from JSON body (less common for DELETE)
     if ($id === 0) {
         $data = json_decode(file_get_contents('php://input'), true);
         $id = (int)($data['id'] ?? 0);
@@ -198,7 +218,7 @@ function handleDeleteSupplierRequest() {
 
     if ($id <= 0) {
         echo json_encode(['success' => false, 'message' => 'Invalid supplier ID.']);
-        http_response_code(400); // Bad Request
+        http_response_code(400);
         return;
     }
 

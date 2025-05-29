@@ -51,7 +51,7 @@ include '../includes/header.php';
                         <div class="card text-center mb-3">
                             <div class="card-body">
                                 <h5 class="card-title">Today's Sales</h5>
-                                <p class="card-text fs-2">₱ 0.00</p>
+                                <p class="card-text fs-2">₱ <span id="todaySalesAmount">0.00</span></p>
                                 <a href="pos_system.php" class="btn btn-primary">Go to Sales</a>
                             </div>
                         </div>
@@ -60,7 +60,7 @@ include '../includes/header.php';
                         <div class="card text-center mb-3">
                             <div class="card-body">
                                 <h5 class="card-title">Low Stock Items</h5>
-                                <p class="card-text fs-2">0</p>
+                                <p class="card-text fs-2"><span id="lowStockCount">0</span></p>
                                 <a href="inventory.php" class="btn btn-warning">View Inventory</a>
                             </div>
                         </div>
@@ -69,8 +69,8 @@ include '../includes/header.php';
                         <div class="card text-center mb-3">
                             <div class="card-body">
                                 <h5 class="card-title">Total Products</h5>
-                                <p class="card-text fs-2">0</p>
-                                <a href="inventory.php" class="btn btn-info">Manage Products</a>
+                                <p class="card-text fs-2"><span id="totalProductsCount">0</span></p>
+                                <a href="products.php" class="btn btn-info">Manage Products</a>
                             </div>
                         </div>
                     </div>
@@ -83,6 +83,5 @@ include '../includes/header.php';
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../public/js/main.js"></script>
-    <script src="../public/js/pos_script.js"></script>
-</body>
+    <script src="../public/js/dashboard_script.js"></script> </body>
 </html>
