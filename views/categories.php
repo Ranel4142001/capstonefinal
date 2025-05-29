@@ -171,7 +171,7 @@ include '../includes/header.php';
                 </div>
             </nav>
             <div class="container-fluid dashboard-page-content mt-5 pt-3">
-
+            <h2 class="mb-4">Category</h2>
                 <?php if (!empty($message)): ?>
                     <div class="alert alert-<?php echo $message_type; ?> alert-dismissible fade show" role="alert">
                         <?php echo $message; ?>

@@ -61,7 +61,7 @@ include '../includes/header.php';
             </nav>
 
             <div class="container-fluid dashboard-page-content mt-5 pt-3">
-                <h2 class="mb-4">Inventory Management</h2>
+                <h2 class="mb-4">Products</h2>
 
                 <div class="card mb-4">
                     <div class="card-header d-flex justify-content-between align-items-center">

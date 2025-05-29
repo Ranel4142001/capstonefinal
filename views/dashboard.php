@@ -70,7 +70,7 @@ include '../includes/header.php';
                             <div class="card-body">
                                 <h5 class="card-title">Total Products</h5>
                                 <p class="card-text fs-2"><span id="totalProductsCount">0</span></p>
-                                <a href="products.php" class="btn btn-info">Manage Products</a>
+                                <a href="inventory.php" class="btn btn-info">Manage Products</a>
                             </div>
                         </div>
                     </div>

@@ -57,7 +57,7 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
             </nav>
 
             <div class="container-fluid dashboard-page-content mt-5 pt-3">
-
+                     <h2 class="mb-4">Transactions</h2>
                 <div class="row">
                     <div class="col-md-6"> <div class="card mb-3">
                             <div class="card-header">
