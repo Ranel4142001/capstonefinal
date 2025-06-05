@@ -43,8 +43,8 @@ include '../includes/header.php';
             </nav>
 
             <div class="container-fluid dashboard-page-content mt-5 pt-3">
-                <h1 class="mb-4">Welcome to the POS Dashboard!</h1>
-                <p>This is where you'll see an overview of your sales and inventory.</p>
+                <h1 class="mb-4"> Mitzikikay General Merchandise Point Of Sale Dashboard!</h1>
+                <p>This dashboard provides an overview of today's sales, low stock items, and your total products.</p>
 
                 <div class="row">
                     <div class="col-md-4">

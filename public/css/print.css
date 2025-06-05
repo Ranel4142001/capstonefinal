@@ -2,39 +2,59 @@
 
 /* --- Print Styles for Report (Standard Printer) --- */
 @media print {
+
     /* Hide elements not needed in the report */
     .no-print,
-    .dashboard-wrapper .sidebar, /* Hide the sidebar */
-    .navbar.custom-navbar-top, /* Hide the top navbar */
-    .btn, /* Hide all buttons */
-    .modal, /* Hide modals */
-    .overlay, /* Hide overlay if active */
-    .pagination, /* Hide pagination controls */
-    .sidebar-toggle-btn { /* Hide any toggle buttons */
+    .dashboard-wrapper .sidebar,
+    /* Hide the sidebar */
+    .navbar.custom-navbar-top,
+    /* Hide the top navbar */
+    .btn,
+    /* Hide all buttons */
+    .modal,
+    /* Hide modals */
+    .overlay,
+    /* Hide overlay if active */
+    .pagination,
+    /* Hide pagination controls */
+    .sidebar-toggle-btn {
+        /* Hide any toggle buttons */
         display: none !important;
     }
 
     /* Ensure main content takes full width and is visible */
     .dashboard-wrapper {
-        display: block !important; /* Ensure wrapper is visible */
-        margin-left: 0 !important; /* Override sidebar margin */
-        padding: 0 !important; /* Remove any padding from wrapper */
+        display: block !important;
+        /* Ensure wrapper is visible */
+        margin-left: 0 !important;
+        /* Override sidebar margin */
+        padding: 0 !important;
+        /* Remove any padding from wrapper */
     }
 
     .main-content {
-        display: block !important; /* Ensure main content is visible */
-        margin-left: 0 !important; /* Ensure main content is full width */
-        padding: 0 !important; /* Remove all padding from main-content */
+        display: block !important;
+        /* Ensure main content is visible */
+        margin-left: 0 !important;
+        /* Ensure main content is full width */
+        padding: 0 !important;
+        /* Remove all padding from main-content */
         width: 100% !important;
-        float: none !important; /* Prevent floating issues */
-        position: static !important; /* Prevent positioning issues */
+        float: none !important;
+        /* Prevent floating issues */
+        position: static !important;
+        /* Prevent positioning issues */
     }
 
     .container-fluid.dashboard-page-content {
-        display: block !important; /* Ensure content area is visible */
-        margin: 0 !important; /* Remove any margins */
-        padding: 0 1cm !important; /* Standard print margins (1cm from left/right) */
-        width: auto !important; /* Let content determine width */
+        display: block !important;
+        /* Ensure content area is visible */
+        margin: 0 !important;
+        /* Remove any margins */
+        padding: 0 1cm !important;
+        /* Standard print margins (1cm from left/right) */
+        width: auto !important;
+        /* Let content determine width */
     }
 
     /* Target the H2 directly inside dashboard-page-content */
@@ -47,10 +67,12 @@
 
     /* Specific styles for the report content */
     body {
-        font-family: 'Times New Roman', serif; /* A more formal font for reports */
+        font-family: 'Times New Roman', serif;
+        /* A more formal font for reports */
         font-size: 11pt;
         color: #000;
-        -webkit-print-color-adjust: exact; /* Ensure background colors print */
+        -webkit-print-color-adjust: exact;
+        /* Ensure background colors print */
         print-color-adjust: exact;
     }
 
@@ -60,7 +82,8 @@
         margin-bottom: 20px;
         padding-bottom: 10px;
         border-bottom: 1px solid #ccc;
-        display: block; /* Ensure it's visible in print */
+        display: block;
+        /* Ensure it's visible in print */
     }
 
     .print-header h3 {
@@ -82,15 +105,18 @@
 
     th,
     td {
-        border: 1px solid #ddd; /* Add borders for report clarity */
+        border: 1px solid #ddd;
+        /* Add borders for report clarity */
         padding: 8px;
         text-align: left;
     }
 
     thead {
         background-color: #f2f2f2;
-        display: table-header-group; /* Repeat table headers on new pages */
+        display: table-header-group;
+        /* Repeat table headers on new pages */
     }
+
     th {
         color: #333;
         font-weight: bold;
@@ -98,19 +124,24 @@
 
     /* Summary boxes should print clearly */
     .summary-box {
-        background-color: #e9ecef !important; /* Light background for print */
-        color: #000 !important; /* Black text */
+        background-color: #e9ecef !important;
+        /* Light background for print */
+        color: #000 !important;
+        /* Black text */
         border: 1px solid #dee2e6;
-        padding: 15px; /* Add padding for better look */
+        padding: 15px;
+        /* Add padding for better look */
         margin-bottom: 15px;
-        page-break-inside: avoid; /* Keep summary boxes together */
+        page-break-inside: avoid;
+        /* Keep summary boxes together */
     }
 
     /* Ensure card elements don't get messed up */
     .card {
         border: 1px solid #dee2e6;
         margin-bottom: 15px;
-        box-shadow: none !important; /* Remove shadows for print */
+        box-shadow: none !important;
+        /* Remove shadows for print */
         page-break-inside: avoid;
     }
 
@@ -131,12 +162,14 @@
     }
 
     tfoot {
-        display: table-footer-group; /* Repeat table footers on new pages */
+        display: table-footer-group;
+        /* Repeat table footers on new pages */
     }
 
     /* Force no print margins/headers/footers from the browser on report pages */
     @page {
-        margin: 1cm !important; /* Standard margins for a report */
+        margin: 1cm !important;
+        /* Standard margins for a report */
     }
 }
 
@@ -144,8 +177,10 @@
 /* Optimized Print-Specific CSS for Thermal Receipt Printer with Centered Details */
 /* These styles are specifically for printing receipts and do not affect screen responsiveness. */
 @media print {
+
     /* Critical for single page: Ensure HTML and body have no extra space and manage overflow */
-    html, body {
+    html,
+    body {
         height: 1px !important;
         overflow: hidden !important;
         margin: 0 !important;
@@ -193,16 +228,21 @@
     /* SPECIFICALLY CENTER THESE ELEMENTS for the header and footer sections */
     #receipt-template h3,
     #receipt-template p,
-    #receipt-template div:first-of-type, /* Targets the first div within receipt-template (store info) */
-    #receipt-template div:last-of-type /* Targets the last div within receipt-template (thank you message) */
-    {
+    #receipt-template div:first-of-type,
+    /* Targets the first div within receipt-template (store info) */
+    #receipt-template div:last-of-type
+
+    /* Targets the last div within receipt-template (thank you message) */
+        {
         text-align: center !important;
-        margin-left: auto !important; /* Help with centering block elements */
-        margin-right: auto !important; /* Help with centering block elements */
+        margin-left: auto !important;
+        /* Help with centering block elements */
+        margin-right: auto !important;
+        /* Help with centering block elements */
     }
 
     /* For the Date, Sale ID, Cashier lines - these are direct children p tags */
-    #receipt-template > p {
+    #receipt-template>p {
         text-align: center !important;
         margin-left: auto !important;
         margin-right: auto !important;
@@ -216,33 +256,58 @@
         /* Table itself should NOT be text-aligned center, its cells will be aligned */
         text-align: left !important;
     }
+
     #receipt-template th,
     #receipt-template td {
         padding: 1px 0 !important;
         vertical-align: top !important;
         border: none !important;
     }
+
     #receipt-template th {
         border-bottom: 1px dashed #000 !important;
         padding-bottom: 3px !important;
     }
+
     #receipt-template tr {
         page-break-inside: avoid !important;
     }
+
     /* Specific table column alignment */
-    #receipt-template td:nth-child(1) { text-align: left !important; } /* Item name */
-    #receipt-template td:nth-child(2) { text-align: center !important; } /* Quantity */
-    #receipt-template td:nth-child(3) { text-align: right !important; } /* Price */
-    #receipt-template td:nth-child(4) { text-align: right !important; } /* Total */
+    #receipt-template td:nth-child(1) {
+        text-align: left !important;
+    }
+
+    /* Item name */
+    #receipt-template td:nth-child(2) {
+        text-align: center !important;
+    }
+
+    /* Quantity */
+    #receipt-template td:nth-child(3) {
+        text-align: right !important;
+    }
+
+    /* Price */
+    #receipt-template td:nth-child(4) {
+        text-align: right !important;
+    }
+
+    /* Total */
 
 
     /* RIGHT ALIGNMENT for Subtotal, Discount, Tax, Grand Total, Payment, Cash Received, Change */
-    #receipt-template div:nth-of-type(2), /* This targets the div containing Subtotal to Grand Total */
-    #receipt-template div:nth-of-type(3) /* This targets the div containing Payment Method to Change */
-    {
+    #receipt-template div:nth-of-type(2),
+    /* This targets the div containing Subtotal to Grand Total */
+    #receipt-template div:nth-of-type(3)
+
+    /* This targets the div containing Payment Method to Change */
+        {
         text-align: right !important;
     }
-    #receipt-template h4 { /* Grand Total heading */
+
+    #receipt-template h4 {
+        /* Grand Total heading */
         text-align: right !important;
     }
 
@@ -251,8 +316,10 @@
     #receipt-template hr {
         border: none !important;
         border-top: 1px dashed #000 !important;
-        margin: 8px auto !important; /* Center the HR */
-        width: 90% !important; /* Give it a width to center it within the 80mm */
+        margin: 8px auto !important;
+        /* Center the HR */
+        width: 90% !important;
+        /* Give it a width to center it within the 80mm */
     }
 
     /* Ensuring no extra space from generic divs (if any remain outside of the targeted ones) */
@@ -265,11 +332,29 @@
     @page {
         margin: 0 !important;
         size: 80mm auto !important;
-        @top-left { content: ""; }
-        @top-center { content: ""; }
-        @top-right { content: ""; }
-        @bottom-left { content: ""; }
-        @bottom-center { content: ""; }
-        @bottom-right { content: ""; }
+
+        @top-left {
+            content: "";
+        }
+
+        @top-center {
+            content: "";
+        }
+
+        @top-right {
+            content: "";
+        }
+
+        @bottom-left {
+            content: "";
+        }
+
+        @bottom-center {
+            content: "";
+        }
+
+        @bottom-right {
+            content: "";
+        }
     }
 }

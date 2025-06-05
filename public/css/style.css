@@ -23,37 +23,39 @@ body {
 /* --- Sidebar Styling --- */
 .sidebar {
     width: 250px;
-    /* Default width for desktop */
     background-color: #2c3e50;
-    /* Dark blue-grey */
     color: #ecf0f1;
     padding-top: 20px;
-    /* This padding is for content within the sidebar itself */
     box-shadow: 2px 0 5px rgba(0, 0, 0, 0.15);
     transition: all 0.3s ease-in-out;
-    /* Smooth transition for width/position changes */
     flex-shrink: 0;
-    /* Prevents sidebar from shrinking */
     overflow-y: auto;
-    /* Enable scrolling for long menus */
     position: relative;
-    /* Essential for desktop layout */
 }
 
 .sidebar-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 20px 20px 20px;
+    /* Adjust this line to reduce padding-bottom */
+    /* Original: padding: 0 20px 20px 20px; */
+    padding: 0 20px 5px 20px;
+    /* Changed 20px to 5px for padding-bottom */
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     margin-bottom: 10px;
 }
 
 .sidebar-header h3 {
+    /* Your HTML uses h10, but CSS targets h3. Be consistent. */
     margin: 0;
     font-size: 1.5em;
     color: #fff;
+    /* You had <h10> in HTML, but CSS targets h3. If you keep h10, add this: */
+    /* If you change h10 to span, add .sidebar-header span { ... } */
+    line-height: 1.2;
+    /* Adjust as needed for tighter spacing above and below text */
 }
+
 
 .close-sidebar-btn {
     background: none;

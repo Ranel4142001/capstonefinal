@@ -185,7 +185,7 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
 
     <div id="receipt-template" style="display: none;">
     <div>
-        <h3>YOUR STORE NAME HERE</h3>
+        <h3>MITZIKIKAY GENERAL MERCHANDISE</h3>
         <p>Your Address, Danao City, Philippines</p>
         <p>Contact: (012) 345-6789</p>
         <p>VAT Reg. TIN: 123-456-789-00000</p>
