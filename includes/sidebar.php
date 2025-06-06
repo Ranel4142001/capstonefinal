@@ -89,6 +89,7 @@ $base_url_path = '/capstonefinal'; // Adjust this if 'capstonefinal' is not dire
         <li><a href="<?php echo $base_url_path; ?>/views/user_management.php" class="sidebar-link"><i class="fas fa-users"></i> User Management</a></li>
 
         <li><a href="<?php echo $base_url_path; ?>/views/customers.php" class="sidebar-link"><i class="fas fa-user-friends"></i> Customers</a></li>
-        <li class="menu-item-bottom"><a href="<?php echo $base_url_path; ?>/views/logout.php" class="sidebar-link"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+        
+        <li class="menu-item-bottom"><a href="<?php echo $base_url_path; ?>/index.php" class="sidebar-link"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
     </ul>
 </div>

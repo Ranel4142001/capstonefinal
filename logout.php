@@ -9,6 +9,6 @@ session_destroy();
 
 // Redirect to login page
 $_SESSION['logout_success'] = "You have been successfully logged out.";
-header("location: login.php");
+header("location: index.php");
 exit;
 ?>  

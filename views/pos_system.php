@@ -57,92 +57,81 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
             </nav>
 
             <div class="container-fluid dashboard-page-content mt-5 pt-3">
-                     <h2 class="mb-4">Transactions</h2>
+                    <h2 class="mb-4">Transactions</h2>
                 <div class="row">
                     <div class="col-md-6"> <div class="card mb-3">
-                            <div class="card-header">
-                                <h5 class="mb-0">Product Scan / Find</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="input-group mb-3">
-                                    <input type="text" id="barcodeInput" class="form-control form-control-lg"
-                                        placeholder="Scan or type barcode" aria-label="Barcode Input" autofocus>
-                                    <button class="btn btn-primary" type="button" id="lookupProductBtn">Find</button>
+                                <div class="card-header">
+                                    <h5 class="mb-0">Product Scan / Find</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="input-group mb-3">
+                                        <input type="text" id="barcodeInput" class="form-control form-control-lg"
+                                            placeholder="Scan or type barcode" aria-label="Barcode Input" autofocus>
+                                        <button class="btn btn-primary" type="button" id="lookupProductBtn">Find</button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="mb-0">Current Sale (Cart)</h5>
-                            </div>
-                            <div class="card-body p-0">
-                                <div class="table-responsive">
-                                    <table class="table table-striped table-hover mb-0">
-                                        <thead>
-                                            <tr>
-                                                <th>Product</th>
-                                                <th>Price</th>
-                                                <th>Qty</th>
-                                                <th>Subtotal</th>
-                                                <th>Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="cartItems">
-                                            <tr>
-                                                <td colspan="5" class="text-center text-muted py-4">No items in cart yet. Scan a product!</td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Current Sale (Cart)</h5>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped table-hover mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>Product</th>
+                                                    <th>Price</th>
+                                                    <th>Qty</th>
+                                                    <th>Subtotal</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="cartItems">
+                                                <tr>
+                                                    <td colspan="5" class="text-center text-muted py-4">No items in cart yet. Scan a product!</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="card-footer text-end">
+                                    <h4 class="mb-2">Total: <span id="cartTotal">₱ 0.00</span></h4>
+                                    <button class="btn btn-success me-2" id="completeSaleBtn">Complete Sale</button>
+                                    <button class="btn btn-danger" id="clearCartBtn">Clear Cart</button>
                                 </div>
                             </div>
-                            <div class="card-footer text-end">
-                                <h4 class="mb-2">Total: <span id="cartTotal">₱ 0.00</span></h4>
-                                <button class="btn btn-success me-2" id="completeSaleBtn">Complete Sale</button>
-                                <button class="btn btn-danger" id="clearCartBtn">Clear Cart</button>
-                            </div>
-                        </div>
                     </div>
 
                     <div class="col-md-6"> <div class="card mb-3">
-                            <div class="card-header">
-                                <h5 class="mb-0">Sale Details / Payment</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="mb-3">
-                                    <label for="discountInput" class="form-label">Discount (%)</label>
-                                    <input type="number" class="form-control" id="discountInput" value="0" min="0" max="100">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Sale Details / Payment</h5>
                                 </div>
-                                <div class="mb-3">
-                                    <label for="taxRateInput" class="form-label">Tax Rate (%)</label>
-                                    <input type="number" class="form-control" id="taxRateInput" value="12" min="0" step="0.1">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="paymentMethod" class="form-label">Payment Method</label>
-                                    <select class="form-select" id="paymentMethod">
-                                        <option value="Cash">Cash</option>
-                                        <option value="Credit Card">Credit Card</option>
-                                        <option value="GCash">GCash</option>
-                                    </select>
-                                </div>
-                                <div id="cashPaymentSection" class="mb-3">
-                                    <label for="cashReceived" class="form-label">Cash Received</label>
-                                    <input type="number" class="form-control" id="cashReceived" placeholder="Enter cash received">
-                                    <div class="mt-2">Change Due: <span id="changeDue">₱ 0.00</span></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="mb-0">Customer Details (Optional)</h5>
-                            </div>
-                            <div class="card-body">
-                                <input type="text" class="form-control mb-2" placeholder="Search customer by name/phone">
-                                <button class="btn btn-outline-secondary btn-sm">Select Customer</button>
-                                <div class="mt-2" id="selectedCustomer">
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label for="discountInput" class="form-label">Discount (%)</label>
+                                        <input type="number" class="form-control" id="discountInput" value="0" min="0" max="100">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="taxRateInput" class="form-label">Tax Rate (%)</label>
+                                        <input type="number" class="form-control" id="taxRateInput" value="12" min="0" step="0.1">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="paymentMethod" class="form-label">Payment Method</label>
+                                        <select class="form-select" id="paymentMethod">
+                                            <option value="Cash">Cash</option>
+                                            <option value="Credit Card">Credit Card</option>
+                                            <option value="GCash">GCash</option>
+                                        </select>
+                                    </div>
+                                    <div id="cashPaymentSection" class="mb-3">
+                                        <label for="cashReceived" class="form-label">Cash Received</label>
+                                        <input type="number" class="form-control" id="cashReceived" placeholder="Enter cash received">
+                                        <div class="mt-2">Change Due: <span id="changeDue">₱ 0.00</span></div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -186,8 +175,8 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
     <div id="receipt-template" style="display: none;">
     <div>
         <h3>MITZIKIKAY GENERAL MERCHANDISE</h3>
-        <p>Your Address, Danao City, Philippines</p>
-        <p>Contact: (012) 345-6789</p>
+        <p>Borbon, Cebu City, Philippines</p>
+        <p>Contact: 09301071994</p>
         <p>VAT Reg. TIN: 123-456-789-00000</p>
     </div>
     <hr>
