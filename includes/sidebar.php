@@ -24,6 +24,12 @@ $base_url_path = '/capstonefinal'; // Adjust this if 'capstonefinal' is not dire
                         <i class="fas fa-boxes"></i> Add Stocks
                     </a>
                 </li>
+
+                 <li>
+                    <a href="<?php echo $base_url_path; ?>/views/add_product.php" class="sidebar-link submenu-link">
+                        <i class="fas fa-plus-square"></i> Add Product
+                    </a>
+                </li>
                 
                 <li>
                     <a href="<?php echo $base_url_path; ?>/views/categories.php" class="sidebar-link submenu-link">
@@ -46,11 +52,7 @@ $base_url_path = '/capstonefinal'; // Adjust this if 'capstonefinal' is not dire
                     </a>
                 </li>
 
-                <li>
-                    <a href="<?php echo $base_url_path; ?>/views/add_product.php" class="sidebar-link submenu-link">
-                        <i class="fas fa-plus-square"></i> Add Product
-                    </a>
-                </li>
+                
             </ul>
         </li>
             
