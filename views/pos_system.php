@@ -47,7 +47,7 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
                             </ul>
                         <ul class="navbar-nav ms-auto">
                             <li class="nav-item d-flex align-items-center">
-                                <span class="nav-link text-white me-2">Welcome, <?php echo htmlspecialchars($_SESSION["username"]); ?> (Role: <?php echo htmlspecialchars($_SESSION["role"]); ?>)</span>
+                                <span class="nav-link text-white me-2">Welcome, <?php echo htmlspecialchars($_SESSION["username"]); ?> (<?php echo htmlspecialchars($_SESSION["role"]); ?>)</span>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link btn btn-danger btn-sm text-white" href="../index.php">Logout</a> </li>

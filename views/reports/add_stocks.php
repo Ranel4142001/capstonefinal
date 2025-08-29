@@ -50,7 +50,7 @@ include '../../includes/header.php';
                     <ul class="navbar-nav ms-auto">
                         <!-- Display welcome message with username and role from session. -->
                         <li class="nav-item d-flex align-items-center">
-                            <span class="nav-link text-white me-2">Welcome, <?php echo htmlspecialchars($_SESSION["username"] ?? 'Guest'); ?> (Role: <?php echo htmlspecialchars($_SESSION["role"] ?? 'N/A'); ?>)</span>
+                            <span class="nav-link text-white me-2">Welcome, <?php echo htmlspecialchars($_SESSION["username"] ?? 'Guest'); ?> (<?php echo htmlspecialchars($_SESSION["role"] ?? 'N/A'); ?>)</span>
                         </li>
                         <!-- Logout button, using base URL path for consistency. -->
                         <li class="nav-item">

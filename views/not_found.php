@@ -28,7 +28,7 @@ include '../includes/header.php';
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0"></ul>
                     <ul class="navbar-nav ms-auto">
                         <li class="nav-item d-flex align-items-center">
-                            <span class="nav-link text-white me-2">Welcome, <?php echo htmlspecialchars($_SESSION["username"] ?? 'Guest'); ?> (Role: <?php echo htmlspecialchars($_SESSION["role"] ?? 'N/A'); ?>)</span>
+                            <span class="nav-link text-white me-2">Welcome, <?php echo htmlspecialchars($_SESSION["username"] ?? 'Guest'); ?> (<?php echo htmlspecialchars($_SESSION["role"] ?? 'N/A'); ?>)</span>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link btn btn-danger btn-sm text-white" href="<?php echo $base_url_path; ?>/logout.php">Logout</a>
