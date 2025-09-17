@@ -6,6 +6,7 @@ header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
 header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
+
 require_once '../config/db.php'; // Include database connection
 
 $method = $_SERVER['REQUEST_METHOD'];
@@ -38,9 +39,9 @@ function handleGetRequest($pdo, $lowStockThreshold) {
     $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
     $offset = isset($_GET['offset']) ? (int)$_GET['offset'] : 0;
 
-    $sql = "SELECT p.id, p.name, p.barcode, p.price, p.stock_quantity, c.name as category_name
-            FROM products p
-            LEFT JOIN categories c ON p.category_id = c.id";
+    $sql = "SELECT p.id, p.name, p.barcode, p.price, p.cost_price, p.stock_quantity, c.name as category_name
+             FROM products p
+             LEFT JOIN categories c ON p.category_id = c.id";
     
     $countSql = "SELECT COUNT(*)
                  FROM products p

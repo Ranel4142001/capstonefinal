@@ -15,6 +15,7 @@ error_reporting(E_ALL);
 
 session_start(); // Start session to access user_id for logging
 
+
 require_once '../config/db.php'; // Your database connection using PDO
 
 $method = $_SERVER['REQUEST_METHOD'];
@@ -24,14 +25,32 @@ switch ($method) {
         handleGetRequest($pdo);
         break;
     case 'POST':
-        // handlePostRequest($pdo); // This case is for adding new products, uncomment and define if needed.
-        http_response_code(405); // Method Not Allowed by default if not implemented
+        // Only admins can add products
+        if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+            http_response_code(403);
+            echo json_encode(array("success" => false, "message" => "You do not have permission to add products."));
+            exit;
+        }
+        // handlePostRequest($pdo);
+        http_response_code(405);
         echo json_encode(array("message" => "POST method not implemented."));
         break;
     case 'PUT':
-        handlePutRequest($pdo); // <-- This function now includes stock history logging
+        // Only admins can edit products
+        if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+            http_response_code(403);
+            echo json_encode(array("success" => false, "message" => "You do not have permission to edit products."));
+            exit;
+        }
+        handlePutRequest($pdo);
         break;
     case 'DELETE':
+        // Only admins can delete products
+        if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+            http_response_code(403);
+            echo json_encode(array("success" => false, "message" => "You do not have permission to delete products."));
+            exit;
+        }
         handleDeleteRequest($pdo);
         break;
     default:
@@ -46,7 +65,7 @@ function handleGetRequest($pdo) {
     $limit = (int)($_GET['limit'] ?? 10);
     $offset = (int)($_GET['offset'] ?? 0);
 
-    $sql = "SELECT p.id, p.name, p.barcode, p.price, p.stock_quantity, c.name as category_name
+    $sql = "SELECT p.id, p.name, p.barcode, p.price, p.cost_price, p.stock_quantity, c.name as category_name
             FROM products p
             LEFT JOIN categories c ON p.category_id = c.id";
     $conditions = [];
@@ -116,7 +135,7 @@ function handlePutRequest($pdo) {
         exit();
     }
 
-    $required_fields = ['id', 'name', 'category_id', 'price', 'stock_quantity'];
+    $required_fields = ['id', 'name', 'category_id', 'cost_price', 'price', 'stock_quantity'];
     foreach ($required_fields as $field) {
         if (!isset($data[$field]) || ($field !== 'barcode' && $data[$field] === '')) {
             http_response_code(400);
@@ -130,7 +149,8 @@ function handlePutRequest($pdo) {
         $name = $data['name'];
         $category_id = $data['category_id'];
         $price = $data['price'];
-        $new_stock_quantity = $data['stock_quantity']; // This is the stock quantity AFTER the update
+        $cost_price = $data['cost_price'];
+        $new_stock_quantity = $data['stock_quantity'];
         $barcode = $data['barcode'] ?? null;
 
         // --- Step 1: Get the current stock quantity BEFORE the update ---
@@ -151,17 +171,19 @@ function handlePutRequest($pdo) {
                                     name = ?,
                                     category_id = ?,
                                     price = ?,
+                                    cost_price = ?,
                                     stock_quantity = ?,
                                     barcode = ?
                                 WHERE id = ?");
-
-        $stmt->execute([$name, $category_id, $price, $new_stock_quantity, $barcode, $product_id]);
+        
+        // Corrected: The order of variables now matches the order in the SQL query
+        $stmt->execute([$name, $category_id, $price, $cost_price, $new_stock_quantity, $barcode, $product_id]);
 
         // Check if update was successful (rowCount > 0 means a row was affected)
         if ($stmt->rowCount() > 0) {
             // --- Step 3: Log the change in stock_history if stock quantity has changed ---
             if ($new_stock_quantity != $old_stock_quantity) {
-                $quantity_change = $new_stock_quantity - $old_stock_quantity; // Positive for increase, negative for decrease
+                $quantity_change = $new_stock_quantity - $old_stock_quantity;
                 $change_type = '';
                 $notes = '';
 
@@ -173,17 +195,15 @@ function handlePutRequest($pdo) {
                     $notes = 'Manual stock decrease via product edit';
                 }
                 
-                // Only log if there was an actual change and a type is set
                 if (!empty($change_type)) {
-                    // Corrected column name: new_stock_quantity changed to current_quantity_after_change
                     $stmtHistory = $pdo->prepare("INSERT INTO stock_history (product_id, change_type, quantity_change, current_quantity_after_change, user_id, description) VALUES (?, ?, ?, ?, ?, ?)");
                     $stmtHistory->execute([
                         $product_id,
                         $change_type,
                         $quantity_change,
-                        $new_stock_quantity, // This variable holds the correct value
-                        $_SESSION['user_id'] ?? null, // Use session user_id if logged in
-                        $notes // Using 'description' column as per stock_history table
+                        $new_stock_quantity,
+                        $_SESSION['user_id'] ?? null,
+                        $notes
                     ]);
                 }
             }
@@ -191,8 +211,7 @@ function handlePutRequest($pdo) {
             http_response_code(200);
             echo json_encode(array("success" => true, "message" => "Product updated successfully."));
         } else {
-            // No rows affected means either product_id didn't exist (handled above) or data was same
-            http_response_code(200); // Still 200, but inform no change
+            http_response_code(200);
             echo json_encode(array("success" => false, "message" => "Product not found or no changes made."));
         }
 

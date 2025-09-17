@@ -12,13 +12,6 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
-// Security check: Ensure only 'admin' or 'staff' can access this API.
-// This prevents unauthorized users from fetching sensitive sales data.
-if (!isset($_SESSION['role']) || ($_SESSION['role'] !== 'admin' && $_SESSION['role'] !== 'staff')) {
-    echo json_encode(['status' => 'error', 'message' => 'Access denied. Insufficient permissions.']);
-    exit();
-}
-
 // Initialize database connection.
 try {
     $conn = get_db_connection();

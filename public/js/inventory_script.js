@@ -16,20 +16,21 @@ document.addEventListener('DOMContentLoaded', function () {
     const editProductId = document.getElementById('editProductId');
     const editProductName = document.getElementById('editProductName');
     const editProductCategory = document.getElementById('editProductCategory');
+    const editProductCostPrice = document.getElementById('editProductCostPrice'); // NEW ELEMENT
     const editProductPrice = document.getElementById('editProductPrice');
     const editProductStock = document.getElementById('editProductStock');
     const editProductBarcode = document.getElementById('editProductBarcode');
 
     // Function to fetch products from the API and update the table
     async function fetchProducts() {
-        productTableBody.innerHTML = `<tr><td colspan="7" class="text-center text-info py-4">Fetching products...</td></tr>`;
+        productTableBody.innerHTML = `<tr><td colspan="8" class="text-center text-info py-4">Fetching products...</td></tr>`;
 
         const searchTerm = productSearch.value.trim();
         const categoryId = categoryFilter.value;
         const offset = (currentPage - 1) * productsPerPage;
 
         // Ensure this path correctly points to your API endpoint for products
-        let url = `../api/inventory.php?limit=${productsPerPage}&offset=${offset}`;
+        let url = `../api/products.php?limit=${productsPerPage}&offset=${offset}`;
         if (searchTerm) {
             url += `&search=${encodeURIComponent(searchTerm)}`;
         }
@@ -47,24 +48,25 @@ document.addEventListener('DOMContentLoaded', function () {
                 renderProducts(data.products);
                 renderPagination();
             } else {
-                productTableBody.innerHTML = `<tr><td colspan="7" class="text-center text-danger py-4">${data.message || 'Error fetching products.'}</td></tr>`;
+                productTableBody.innerHTML = `<tr><td colspan="8" class="text-center text-danger py-4">${data.message || 'Error fetching products.'}</td></tr>`;
                 totalProducts = 0;
                 renderPagination();
             }
         } catch (error) {
             console.error('Error fetching products:', error);
-            productTableBody.innerHTML = `<tr><td colspan="7" class="text-center text-danger py-4">Failed to load products. Network error or server issue.</td></tr>`;
+            productTableBody.innerHTML = `<tr><td colspan="8" class="text-center text-danger py-4">Failed to load products. Network error or server issue.</td></tr>`;
             totalProducts = 0;
             renderPagination();
         }
     }
 
     // Function to render products in the table
+    // Function to render products in the table
     function renderProducts(products) {
         productTableBody.innerHTML = ''; // Clear existing rows
 
         if (products.length === 0) {
-            productTableBody.innerHTML = `<tr><td colspan="7" class="text-center text-muted py-4">No products found.</td></tr>`;
+            productTableBody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-4">No products found.</td></tr>`;
             return;
         }
 
@@ -75,39 +77,40 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Apply low stock styling and text
             if (product.stock_quantity <= lowStockThreshold) {
-                stockClass = 'text-danger fw-bold'; // Bootstrap classes for red and bold
-                stockDisplay += ' (Low Stock)'; // Add status text
+                stockClass = 'text-danger fw-bold';
+                stockDisplay += ' (Low Stock)';
             }
 
             row.innerHTML = `
-                <td>${product.id}</td>
-                <td>${htmlspecialchars(product.name)}</td>
-                <td>${htmlspecialchars(product.category_name || 'N/A')}</td>
-                <td>₱ ${parseFloat(product.price).toFixed(2)}</td>
-                <td class="${stockClass}">${stockDisplay}</td>
-                <td>${htmlspecialchars(product.barcode || 'N/A')}</td>
-                <td>
-                    <button class="btn btn-sm btn-info me-1 edit-product-btn"
-                            data-id="${product.id}"
-                            data-name="${htmlspecialchars(product.name)}"
-                            data-category-id="${product.category_id}"
-                            data-price="${product.price}"
-                            data-stock="${product.stock_quantity}"
-                            data-barcode="${htmlspecialchars(product.barcode || '')}"
-                            title="Edit Product">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="btn btn-sm btn-danger delete-product-btn" data-id="${product.id}" title="Delete Product">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </td>
-            `;
+            <td>${product.id}</td>
+            <td>${htmlspecialchars(product.name)}</td>
+            <td>${htmlspecialchars(product.category_name || 'N/A')}</td>
+            <td>₱ ${parseFloat(product.price).toFixed(2)}</td>
+            <td>₱ ${parseFloat(product.cost_price).toFixed(2)}</td> 
+            <td class="${stockClass}">${stockDisplay}</td>
+            <td>${htmlspecialchars(product.barcode || 'N/A')}</td>
+            <td>
+                <button class="btn btn-sm btn-info me-1 edit-product-btn"
+                        data-id="${product.id}"
+                        data-name="${htmlspecialchars(product.name)}"
+                        data-category-id="${product.category_id}"
+                        data-price="${product.price}"
+                        data-cost-price="${product.cost_price}"
+                        data-stock="${product.stock_quantity}"
+                        data-barcode="${htmlspecialchars(product.barcode || '')}"
+                        title="Edit Product">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-danger delete-product-btn" data-id="${product.id}" title="Delete Product">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </td>
+        `;
             productTableBody.appendChild(row);
         });
 
-        attachActionEventListeners(); // Attach event listeners after rendering products
+        attachActionEventListeners();
     }
-
     // Function to render pagination controls
     function renderPagination() {
         productPagination.innerHTML = ''; // Clear existing pagination
@@ -179,6 +182,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const productId = button.dataset.id;
         const productName = button.dataset.name;
         const productCategoryId = button.dataset.categoryId;
+        const productCostPrice = button.dataset.costPrice;
         const productPrice = button.dataset.price;
         const productStock = button.dataset.stock;
         const productBarcode = button.dataset.barcode;
@@ -187,7 +191,8 @@ document.addEventListener('DOMContentLoaded', function () {
         editProductId.value = productId;
         editProductName.value = productName;
         editProductCategory.value = productCategoryId;
-        editProductPrice.value = parseFloat(productPrice).toFixed(2); // Ensure price is formatted
+        editProductCostPrice.value = parseFloat(productCostPrice).toFixed(2); // NEW LINE
+        editProductPrice.value = parseFloat(productPrice).toFixed(2);
         editProductStock.value = productStock;
         editProductBarcode.value = productBarcode;
 

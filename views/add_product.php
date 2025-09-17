@@ -7,6 +7,9 @@ if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
     exit;
 }
 
+// Set a flag to check if the user is an admin
+$is_admin = ($_SESSION['role'] === 'admin');
+
 require_once '../config/db.php';
 
 // Initialize variables
@@ -24,7 +27,8 @@ try {
     $error_message = "Could not load categories.";
 }
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+// Only process POST requests if the user is an admin
+if ($_SERVER["REQUEST_METHOD"] == "POST" && $is_admin) {
     // Validate inputs
     // Name
     if (empty(trim($_POST["name"]))) {
@@ -60,10 +64,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Cost Price (optional, but validate if provided)
-    if (!empty(trim($_POST["cost_price"])) && is_numeric($_POST["cost_price"]) && $_POST["cost_price"] >= 0) {
-        $cost_price = floatval($_POST["cost_price"]);
-    } else if (!empty(trim($_POST["cost_price"]))) {
+    if (empty(trim($_POST["cost_price"])) || !is_numeric($_POST["cost_price"]) || $_POST["cost_price"] < 0) {
         $cost_price_err = "Please enter a valid cost price (non-negative number).";
+    } else  {
+        $cost_price = floatval($_POST["cost_price"]);
     }
 
     // Stock Quantity
@@ -164,6 +168,12 @@ include '../includes/header.php';
             <div class="container-fluid dashboard-page-content mt-5 pt-3">
                 <h2 class="mb-4">Add New Product</h2>
 
+                <?php if (!$is_admin): ?>
+                    <div class="alert alert-warning" role="alert">
+                        You do not have permission to add new products. Only administrators can perform this action.
+                    </div>
+                <?php endif; ?>
+
                 <?php if (!empty($success_message)): ?>
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
                         <?php echo $success_message; ?>
@@ -180,60 +190,64 @@ include '../includes/header.php';
                 <div class="card">
                     <div class="card-body">
                         <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
-                            <div class="mb-3">
-                                <label for="name" class="form-label">Product Name <span class="text-danger">*</span></label>
-                                <input type="text" name="name" id="name" class="form-control <?php echo (!empty($name_err)) ? 'is-invalid' : ''; ?>" value="<?php echo htmlspecialchars($name); ?>" required>
-                                <div class="invalid-feedback"><?php echo $name_err; ?></div>
-                            </div>
-                            <div class="mb-3">
-                                <label for="barcode" class="form-label">Barcode (Optional)</label>
-                                <input type="text" name="barcode" id="barcode" class="form-control <?php echo (!empty($barcode_err)) ? 'is-invalid' : ''; ?>" value="<?php echo htmlspecialchars($barcode); ?>">
-                                <div class="invalid-feedback"><?php echo $barcode_err; ?></div>
-                            </div>
-                            <div class="mb-3">
-                                <label for="brand" class="form-label">Brand (Optional)</label>
-                                <input type="text" name="brand" id="brand" class="form-control <?php echo (!empty($brand_err)) ? 'is-invalid' : ''; ?>" value="<?php echo htmlspecialchars($brand); ?>">
-                                <div class="invalid-feedback"><?php echo $brand_err; ?></div>
-                            </div>
-                            <div class="mb-3">
-                                <label for="description" class="form-label">Description (Optional)</label>
-                                <textarea name="description" id="description" class="form-control" rows="3"><?php echo htmlspecialchars($description); ?></textarea>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="price" class="form-label">Selling Price <span class="text-danger">*</span></label>
-                                    <input type="number" name="price" id="price" step="0.01" min="0" class="form-control <?php echo (!empty($price_err)) ? 'is-invalid' : ''; ?>" value="<?php echo htmlspecialchars($price); ?>" required>
-                                    <div class="invalid-feedback"><?php echo $price_err; ?></div>
+                            <fieldset <?php echo !$is_admin ? 'disabled' : ''; ?>>
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">Product Name <span class="text-danger">*</span></label>
+                                    <input type="text" name="name" id="name" class="form-control <?php echo (!empty($name_err)) ? 'is-invalid' : ''; ?>" value="<?php echo htmlspecialchars($name); ?>" required>
+                                    <div class="invalid-feedback"><?php echo $name_err; ?></div>
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="cost_price" class="form-label">Cost Price (Optional)</label>
-                                    <input type="number" name="cost_price" id="cost_price" step="0.01" min="0" class="form-control <?php echo (!empty($cost_price_err)) ? 'is-invalid' : ''; ?>" value="<?php echo htmlspecialchars($cost_price); ?>">
-                                    <div class="invalid-feedback"><?php echo $cost_price_err; ?></div>
+                                <div class="mb-3">
+                                    <label for="barcode" class="form-label">Barcode (Optional)</label>
+                                    <input type="text" name="barcode" id="barcode" class="form-control <?php echo (!empty($barcode_err)) ? 'is-invalid' : ''; ?>" value="<?php echo htmlspecialchars($barcode); ?>">
+                                    <div class="invalid-feedback"><?php echo $barcode_err; ?></div>
                                 </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="stock_quantity" class="form-label">Stock Quantity <span class="text-danger">*</span></label>
-                                    <input type="number" name="stock_quantity" id="stock_quantity" min="0" class="form-control <?php echo (!empty($stock_quantity_err)) ? 'is-invalid' : ''; ?>" value="<?php echo htmlspecialchars($stock_quantity); ?>" required>
-                                    <div class="invalid-feedback"><?php echo $stock_quantity_err; ?></div>
+                                <div class="mb-3">
+                                    <label for="brand" class="form-label">Brand (Optional)</label>
+                                    <input type="text" name="brand" id="brand" class="form-control <?php echo (!empty($brand_err)) ? 'is-invalid' : ''; ?>" value="<?php echo htmlspecialchars($brand); ?>">
+                                    <div class="invalid-feedback"><?php echo $brand_err; ?></div>
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="category_id" class="form-label">Category <span class="text-danger">*</span></label>
-                                    <select name="category_id" id="category_id" class="form-select <?php echo (!empty($category_id_err)) ? 'is-invalid' : ''; ?>" required>
-                                        <option value="">Select a Category</option>
-                                        <?php foreach ($categories as $cat): ?>
-                                            <option value="<?php echo htmlspecialchars($cat['id']); ?>" <?php echo ($category_id == $cat['id']) ? 'selected' : ''; ?>>
-                                                <?php echo htmlspecialchars($cat['name']); ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                    <div class="invalid-feedback"><?php echo $category_id_err; ?></div>
+                                <div class="mb-3">
+                                    <label for="description" class="form-label">Description (Optional)</label>
+                                    <textarea name="description" id="description" class="form-control" rows="3"><?php echo htmlspecialchars($description); ?></textarea>
                                 </div>
-                            </div>
-                            <div class="d-flex justify-content-end">
-                                <button type="submit" class="btn btn-primary me-2">Add Product</button>
-                                <a href="inventory.php" class="btn btn-secondary">Cancel</a>
-                            </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="price" class="form-label">Selling Price <span class="text-danger">*</span></label>
+                                        <input type="number" name="price" id="price" step="0.01" min="0" class="form-control <?php echo (!empty($price_err)) ? 'is-invalid' : ''; ?>" value="<?php echo htmlspecialchars($price); ?>" required>
+                                        <div class="invalid-feedback"><?php echo $price_err; ?></div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="cost_price" class="form-label">Cost Price <span class="text-danger">*</span> </label>
+                                        <input type="number" name="cost_price" id="cost_price" step="0.01" min="0" class="form-control <?php echo (!empty($cost_price_err)) ? 'is-invalid' : ''; ?>" value="<?php echo htmlspecialchars($cost_price); ?>">
+                                        <div class="invalid-feedback"><?php echo $cost_price_err; ?></div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="stock_quantity" class="form-label">Stock Quantity <span class="text-danger">*</span></label>
+                                        <input type="number" name="stock_quantity" id="stock_quantity" min="0" class="form-control <?php echo (!empty($stock_quantity_err)) ? 'is-invalid' : ''; ?>" value="<?php echo htmlspecialchars($stock_quantity); ?>" required>
+                                        <div class="invalid-feedback"><?php echo $stock_quantity_err; ?></div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="category_id" class="form-label">Category <span class="text-danger">*</span></label>
+                                        <select name="category_id" id="category_id" class="form-select <?php echo (!empty($category_id_err)) ? 'is-invalid' : ''; ?>" required>
+                                            <option value="">Select a Category</option>
+                                            <?php foreach ($categories as $cat): ?>
+                                                <option value="<?php echo htmlspecialchars($cat['id']); ?>" <?php echo ($category_id == $cat['id']) ? 'selected' : ''; ?>>
+                                                    <?php echo htmlspecialchars($cat['name']); ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                        <div class="invalid-feedback"><?php echo $category_id_err; ?></div>
+                                    </div>
+                                </div>
+                                <?php if ($is_admin): ?>
+                                    <div class="d-flex justify-content-end">
+                                        <button type="submit" class="btn btn-primary me-2">Add Product</button>
+                                        <a href="inventory.php" class="btn btn-secondary">Cancel</a>
+                                    </div>
+                                <?php endif; ?>
+                            </fieldset>
                         </form>
                     </div>
                 </div>

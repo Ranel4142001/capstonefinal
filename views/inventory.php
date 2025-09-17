@@ -90,26 +90,26 @@ include '../includes/header.php';
                             </div>
                         </div>
 
-                        <div class="table-responsive">
-                            <table class="table table-striped table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>ID</th>
-                                        <th>Name</th>
-                                        <th>Category</th>
-                                        <th>Price</th>
-                                        <th>Stock</th>
-                                        <th>Barcode</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="productTableBody">
-                                    <tr>
-                                        <td colspan="7" class="text-center text-muted py-4">Loading products...</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                       <div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Cost Price</th>
+                <th>Stock</th>
+                <th>Barcode</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="productTableBody">
+            <tr>
+                <td colspan="8" class="text-center text-muted py-4">Loading products...</td> </tr>
+        </tbody>
+    </table>
+</div>
 
                         <nav aria-label="Product Pagination">
                             <ul class="pagination justify-content-center" id="productPagination">
@@ -151,9 +151,13 @@ include '../includes/header.php';
                         <div class="mb-3">
                             <label for="editProductPrice" class="form-label">Price</label>
                             <input type="number" step="0.01" class="form-control" id="editProductPrice" name="price" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="editProductStock" class="form-label">Stock</label>
+            </div>
+            <div class="mb-3">
+            <label for="editProductCostPrice" class="form-label">Cost Price</label>
+            <input type="number" step="0.01" class="form-control" id="editProductCostPrice" name="cost_price" required>
+            </div>
+            <div class="mb-3">
+            <label for="editProductStock" class="form-label">Stock</label>
                             <input type="number" class="form-control" id="editProductStock" name="stock_quantity" required>
                         </div>
                         <div class="mb-3">
