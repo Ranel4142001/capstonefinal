@@ -4,6 +4,11 @@
 // Include authentication check to ensure the user is logged in.
 require_once '../../includes/auth_check.php';
 
+// Ensure only 'admin' or 'staff' can access this page for security.
+if ($_SESSION['role'] !== 'admin' && $_SESSION['role'] !== 'staff') {
+    header("Location: ../dashboard.php"); // Redirect non-authorized users.
+    exit();
+}
 
 // Include common utility functions (e.g., for general usage, though API now handles DB).
 require_once '../../includes/functions.php';
@@ -100,7 +105,7 @@ include '../../includes/header.php';
             </div>
 
             <div class="mb-4 text-end no-print">
-            <button class="btn btn-secondary" onclick="window.print()"><i class="fas fa-print"></i> Print Analytics</button>
+                <button class="btn btn-secondary" onclick="printReportInNewWindow()"><i class="fas fa-print"></i> Print Report</button>
             </div>
 
             <div class="card mb-4">
