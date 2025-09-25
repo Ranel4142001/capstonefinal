@@ -1,19 +1,20 @@
 <?php
-        
-        include '../includes/auth_check.php';
-        include '../includes/layout_start.php';
-        include '../includes/functions.php';
-        include '../config/db.php';
+// views/stock_report.php
 
-
+// --- Includes and Initial Setup ---
+include '../includes/auth_check.php';
+include '../includes/layout_start.php';
+include '../includes/functions.php';             // Contains general utility functions
+include '../config/db.php';                     // **CRITICAL: Includes $pdo object**
+include '../includes/stock_report_function.php'; // Contains getTotalProductCount() and getStockDataAsOfDate()
 
 // --- Date Filtering Logic ---
-$start_date = isset($_GET['start_date']) ? sanitize_input($_GET['start_date']) : date('Y-m-01'); // Default to start of current month
-$end_date = isset($_GET['end_date']) ? sanitize_input($_GET['end_date']) : date('Y-m-d');     // Default to current date
+$start_date = isset($_GET['start_date']) ? sanitize_input($_GET['start_date']) : date('Y-m-01');
+$end_date = isset($_GET['end_date']) ? sanitize_input($_GET['end_date']) : date('Y-m-d');
 
 // --- Pagination Logic ---
 $allowed_records_per_page = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
-$default_records_per_page = 10; // Default if not specified or invalid
+$default_records_per_page = 10; 
 
 $records_per_page = isset($_GET['per_page']) && in_array((int)$_GET['per_page'], $allowed_records_per_page) ? (int)$_GET['per_page'] : $default_records_per_page;
 
@@ -25,131 +26,55 @@ $offset = ($current_page - 1) * $records_per_page;
 
 // --- Sorting Logic ---
 $allowed_sort_orders = ['quantity_asc', 'quantity_desc', 'name_asc'];
-$default_sort_order = 'quantity_asc'; // Default sort by lowest quantity
+$default_sort_order = 'quantity_asc';
 
 $sort_order = isset($_GET['sort_order']) && in_array($_GET['sort_order'], $allowed_sort_orders) ? $_GET['sort_order'] : $default_sort_order;
 
 $message = '';
 $message_type = '';
-
-/**
- * Function to get total number of products (for pagination).
- * We still paginate based on the total number of products, as the core "stock report" is about products.
- */
-function getTotalProductCount($conn) {
-    $sql = "SELECT COUNT(id) AS total_count FROM products";
-    $result = $conn->query($sql);
-    if ($result && $row = $result->fetch_assoc()) {
-        return $row['total_count'];
-    }
-    return 0;
-}
-
-/**
- * Function to get stock data from the database.
- * The quantity displayed will be AS OF the $asOfDateTime.
- */
-function getStockDataAsOfDate($conn, $limit, $offset, $sort_order, $asOfDateTime) {
-    $orderByClause = "";
-    switch ($sort_order) {
-        case 'quantity_asc':
-            $orderByClause = "calculated_quantity ASC, p.name ASC";
-            break;
-        case 'quantity_desc':
-            $orderByClause = "calculated_quantity DESC, p.name ASC";
-            break;
-        case 'name_asc':
-        default:
-            $orderByClause = "p.name ASC";
-            break;
-    }
-
-    // SQL query to calculate stock quantity up to the given asOfDateTime
-    // It gets the `current_quantity_after_change` from the LATEST entry for each product
-    // ON or BEFORE the `asOfDateTime`. If no entry, it assumes 0 or initial quantity.
-    $sql = "
-        SELECT
-            p.id AS product_id,
-            p.name AS product_name,
-            c.name AS category_name,
-            s.name AS supplier_name,
-            COALESCE(
-                (
-                    SELECT sh.current_quantity_after_change
-                    FROM stock_history sh
-                    WHERE sh.product_id = p.id
-                      AND sh.change_date <= ?
-                    ORDER BY sh.change_date DESC, sh.id DESC -- Get the very last change
-                    LIMIT 1
-                ),
-                0 -- Default to 0 if no history exists for this product before the date
-            ) AS calculated_quantity,
-            p.cost_price,
-            p.price AS selling_price,
-            p.is_active AS status
-        FROM
-            products p
-        LEFT JOIN
-            categories c ON p.category_id = c.id
-        LEFT JOIN
-            suppliers s ON p.supplier_id = s.id
-        ORDER BY
-            " . $orderByClause . "
-        LIMIT ? OFFSET ?";
-
-    $stmt = $conn->prepare($sql);
-    if (!$stmt) {
-        throw new Exception("Failed to prepare statement: " . $conn->error);
-    }
-    $stmt->bind_param("sii", $asOfDateTime, $limit, $offset);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    $stockData = [];
-    if ($result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-            $stockData[] = $row;
-        }
-    }
-    $stmt->close();
-    return $stockData;
-}
-
-
-// Get database connection
-$conn = get_db_connection();
-
-// Fetch total product count
-$total_products = getTotalProductCount($conn);
-
-// Calculate total pages
-$total_pages = ceil($total_products / $records_per_page);
-
-// Ensure current page is not greater than total pages (if any products exist)
-if ($total_products > 0 && $current_page > $total_pages) {
-    $current_page = $total_pages;
-    $offset = ($current_page - 1) * $records_per_page; // Recalculate offset for the adjusted page
-} elseif ($total_products == 0 && $current_page > 1) {
-    $current_page = 1; // If no products, go to page 1
-    $offset = 0;
-}
-
-
-// Fetch stock data with pagination and sorting, as of the end date
-// We add ' + INTERVAL 1 DAY' to $end_date in the query to include the whole day.
+$lowStockThreshold = 10;
 $stockItems = [];
+
+// =========================================================================
+// FIX: Get the PDO connection directly from the global scope. 
+// This replaces the removed get_db_connection() function.
+// =========================================================================
+global $pdo; 
+$conn = $pdo; // $conn is now the PDO connection object
+
 try {
-    $stockItems = getStockDataAsOfDate($conn, $records_per_page, $offset, $sort_order, $end_date . ' 23:59:59');
+    // Fetch total product count
+    $total_products = getTotalProductCount($conn);
+
+    // Calculate total pages
+    $total_pages = ceil($total_products / $records_per_page);
+
+    // Adjust current page and offset
+    if ($total_products > 0 && $current_page > $total_pages) {
+        $current_page = $total_pages;
+        $offset = ($current_page - 1) * $records_per_page;
+    } elseif ($total_products == 0 && $current_page > 1) {
+        $current_page = 1;
+        $offset = 0;
+    }
+
+    // Fetch stock data with pagination and sorting, as of the end date
+    if ($total_products > 0) {
+        // Note: Appending ' 23:59:59' ensures stock is checked at the very end of the $end_date
+        $stockItems = getStockDataAsOfDate($conn, $records_per_page, $offset, $sort_order, $end_date . ' 23:59:59');
+    }
+
 } catch (Exception $e) {
     $message = "Error fetching stock data: " . $e->getMessage();
     $message_type = 'danger';
 }
 
 
-// Close database connection
-$conn->close();
+// Close database connection (PDO method)
+$conn = null;
 
 
+// --- View/Presentation (HTML starts here) ---
 ?>
 
         <div id="printableArea" class="container-fluid dashboard-page-content mt-5 pt-3">
@@ -241,10 +166,9 @@ $conn->close();
                                                 <?php
                                                     $statusClass = '';
                                                     $displayStatus = '';
-                                                    $lowStockThreshold = 10; // Define a default low stock threshold
-
-                                                    // Use calculated_quantity for stock status
-                                                    if (isset($item['status']) && $item['status'] == 0) { // Assuming 'is_active' 0 means inactive/discontinued
+                                                    
+                                                    // Determine status based on quantity and active status
+                                                    if (isset($item['status']) && $item['status'] == 0) {
                                                         $statusClass = 'badge bg-danger';
                                                         $displayStatus = 'Inactive';
                                                     } elseif ($item['calculated_quantity'] <= $lowStockThreshold) {
@@ -272,20 +196,24 @@ $conn->close();
 
                     <nav aria-label="Page navigation" class="no-print">
                         <ul class="pagination justify-content-center">
+                            <?php 
+                                // Simplified Pagination URL creation
+                                $base_url_params = "&per_page={$records_per_page}&sort_order={$sort_order}&start_date={$start_date}&end_date={$end_date}";
+                            ?>
                             <li class="page-item <?php echo ($current_page <= 1) ? 'disabled' : ''; ?>">
-                                <a class="page-link" href="?page=<?php echo $current_page - 1; ?>&per_page=<?php echo $records_per_page; ?>&sort_order=<?php echo htmlspecialchars($sort_order); ?>&start_date=<?php echo htmlspecialchars($start_date); ?>&end_date=<?php echo htmlspecialchars($end_date); ?>" aria-label="Previous">
+                                <a class="page-link" href="?page=<?php echo $current_page - 1 . $base_url_params; ?>" aria-label="Previous">
                                     <span aria-hidden="true">&laquo;</span>
                                 </a>
                             </li>
                             <?php for ($i = 1; $i <= $total_pages; $i++): ?>
                                 <li class="page-item <?php echo ($current_page == $i) ? 'active' : ''; ?>">
-                                    <a class="page-link" href="?page=<?php echo $i; ?>&per_page=<?php echo $records_per_page; ?>&sort_order=<?php echo htmlspecialchars($sort_order); ?>&start_date=<?php echo htmlspecialchars($start_date); ?>&end_date=<?php echo htmlspecialchars($end_date); ?>">
+                                    <a class="page-link" href="?page=<?php echo $i . $base_url_params; ?>">
                                         <?php echo $i; ?>
                                     </a>
                                 </li>
                             <?php endfor; ?>
                             <li class="page-item <?php echo ($current_page >= $total_pages) ? 'disabled' : ''; ?>">
-                                <a class="page-link" href="?page=<?php echo $current_page + 1; ?>&per_page=<?php echo $records_per_page; ?>&sort_order=<?php echo htmlspecialchars($sort_order); ?>&start_date=<?php echo htmlspecialchars($start_date); ?>&end_date=<?php echo htmlspecialchars($end_date); ?>" aria-label="Next">
+                                <a class="page-link" href="?page=<?php echo $current_page + 1 . $base_url_params; ?>" aria-label="Next">
                                     <span aria-hidden="true">&raquo;</span>
                                 </a>
                             </li>
@@ -301,64 +229,6 @@ $conn->close();
 <?php
         // Close layout (footer, scripts, closing tags)
         include '../includes/layout_end.php'; ?>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const alertElement = document.querySelector('.alert');
-        if (alertElement) {
-            setTimeout(() => {
-                const bootstrapAlert = new bootstrap.Alert(alertElement);
-                bootstrapAlert.close();
-            }, 5000); // 5 seconds
-        }
-    });
-
-    // Custom print function: Opens content in a new window for printing
-    function printReportInNewWindow() {
-        var printContents = document.getElementById('printableArea').innerHTML;
-        var originalTitle = document.title; // Store original title
-
-        // Create a new window
-        var printWindow = window.open('', '_blank', 'height=800,width=800');
-
-        printWindow.document.write('<!DOCTYPE html>');
-        printWindow.document.write('<html lang="en">');
-        printWindow.document.write('<head>');
-        printWindow.document.write('<meta charset="UTF-8">');
-        printWindow.document.write('<meta name="viewport" content="width=device-width, initial-scale=1.0">');
-        printWindow.document.write('<title>Stock Report Print</title>');
-
-        // Link your CSS files from the main page
-        // IMPORTANT: Adjust the paths if your CSS files are not relative to the root like this
-        printWindow.document.write('<link rel="stylesheet" href="<?php echo $base_url_path; ?>/public/css/style.css">');
-        printWindow.document.write('<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">');
-        printWindow.document.write('<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">');
-
-        // Add print-specific styles to hide elements not meant for print
-        printWindow.document.write('<style>');
-        printWindow.document.write('@media print { .no-print { display: none !important; } }');
-        printWindow.document.write('body { font-size: 10pt; } table { width: 100%; border-collapse: collapse; } table, th, td { border: 1px solid black; padding: 8px; }');
-        printWindow.document.write('.print-header { text-align: center; margin-bottom: 20px; }');
-        printWindow.document.write('</style>');
-
-        printWindow.document.write('</head>');
-        printWindow.document.write('<body>');
-        printWindow.document.write(printContents); // Insert the content to print
-        printWindow.document.write('</body>');
-        printWindow.document.write('</html>');
-
-        printWindow.document.close(); // Close the document to ensure content is parsed
-        printWindow.focus(); // Focus the new window
-
-        // Give the browser a moment to render the new window's content and load CSS
-        // Then trigger the print.
-        printWindow.onload = function() {
-            // Check if styles are loaded, if necessary, you can use a timeout as a fallback
-            setTimeout(function() {
-                printWindow.print();
-                printWindow.close(); // Close the print window after printing
-            }, 500); // Small delay to ensure CSS loads
-        };
-    }
-</script>
+        <script src="../public/js/stock_report.js"></script>
 </body>
 </html>

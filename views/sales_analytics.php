@@ -1,118 +1,50 @@
 <?php
-        include '../includes/auth_check.php';
-        include '../includes/layout_start.php';
-        include '../includes/functions.php';
-     
+// views/sales_analytics.php
 
-    $conn = get_db_connection();
+// --- Includes and Initial Setup ---
+include '../includes/auth_check.php';
+include '../includes/layout_start.php';
+include '../includes/functions.php';
+include '../config/db.php'; 
+include '../includes/sales_analytics_function.php'; 
 
-    // --- Date Filtering Logic (same as detailed report for consistency) ---
-    $start_date = isset($_GET['start_date']) ? sanitize_input($_GET['start_date']) : date('Y-m-01');
-    $end_date = isset($_GET['end_date']) ? sanitize_input($_GET['end_date']) : date('Y-m-d');
+// =========================================================================
+// Connection Setup
+// =========================================================================
+global $pdo; 
+/** @var PDO $conn */
+$conn = $pdo; 
 
-    $message = '';
-    $message_type = '';
+// --- Date Filtering Logic ---
+$start_date = isset($_GET['start_date']) ? sanitize_input($_GET['start_date']) : date('Y-m-01');
+$end_date = isset($_GET['end_date']) ? sanitize_input($_GET['end_date']) : date('Y-m-d');
 
-    // --- Fetch Sales Analytics Data ---
-    $top_selling_products = [];
-    $sales_by_cashier = [];
-    $daily_sales_trend = [];
+$message = '';
+$message_type = '';
+
+// --- Data Arrays ---
+$top_selling_products = [];
+$sales_by_cashier = [];
+$daily_sales_trend = [];
 
 try {
-    // Top 10 Selling Products (by quantity)
-    $sql_top_products = "
-        SELECT
-            p.name AS product_name,
-            SUM(si.quantity) AS total_quantity_sold,
-            SUM(si.quantity * si.price_at_sale) AS total_product_sales
-        FROM
-            sale_items si
-        JOIN
-            products p ON si.product_id = p.id
-        JOIN
-            sales s ON si.sale_id = s.id
-        WHERE
-            s.sale_date BETWEEN ? AND ? + INTERVAL 1 DAY
-        GROUP BY
-            p.name
-        ORDER BY
-            total_quantity_sold DESC
-        LIMIT 10;
-    ";
-    $stmt_top_products = $conn->prepare($sql_top_products);
-    if ($stmt_top_products) {
-        $stmt_top_products->bind_param("ss", $start_date, $end_date);
-        $stmt_top_products->execute();
-        $top_selling_products = $stmt_top_products->get_result()->fetch_all(MYSQLI_ASSOC);
-        $stmt_top_products->close();
-    } else {
-        $message .= "Failed to prepare top products query: " . $conn->error . "<br>";
-        $message_type = 'danger';
-    }
+    // Fetch data using the separated functions
+    $top_selling_products = getTopSellingProducts($conn, $start_date, $end_date);
+    $sales_by_cashier = getSalesByCashier($conn, $start_date, $end_date);
+    $daily_sales_trend = getDailySalesTrend($conn, $start_date, $end_date);
 
-    // Sales by Cashier
-    $sql_cashier_sales = "
-        SELECT
-            u.username AS cashier_name,
-            SUM(s.total_amount) AS total_sales_by_cashier,
-            COUNT(s.id) AS total_transactions
-        FROM
-            sales s
-        JOIN
-            users u ON s.cashier_id = u.id
-        WHERE
-            s.sale_date BETWEEN ? AND ? + INTERVAL 1 DAY
-        GROUP BY
-            u.username
-        ORDER BY
-            total_sales_by_cashier DESC;
-    ";
-    $stmt_cashier_sales = $conn->prepare($sql_cashier_sales);
-    if ($stmt_cashier_sales) {
-        $stmt_cashier_sales->bind_param("ss", $start_date, $end_date);
-        $stmt_cashier_sales->execute();
-        $sales_by_cashier = $stmt_cashier_sales->get_result()->fetch_all(MYSQLI_ASSOC);
-        $stmt_cashier_sales->close();
-    } else {
-        $message .= "Failed to prepare cashier sales query: " . $conn->error . "<br>";
-        $message_type = 'danger';
-    }
-
-    // Daily Sales Trend
-    $sql_daily_sales = "
-        SELECT
-            DATE(sale_date) AS sale_day,
-            SUM(total_amount) AS daily_total_sales
-        FROM
-            sales
-        WHERE
-            sale_date BETWEEN ? AND ? + INTERVAL 1 DAY
-        GROUP BY
-            DATE(sale_date)
-        ORDER BY
-            sale_day ASC;
-    ";
-    $stmt_daily_sales = $conn->prepare($sql_daily_sales);
-    if ($stmt_daily_sales) {
-        $stmt_daily_sales->bind_param("ss", $start_date, $end_date);
-        $stmt_daily_sales->execute();
-        $daily_sales_trend = $stmt_daily_sales->get_result()->fetch_all(MYSQLI_ASSOC);
-        $stmt_daily_sales->close();
-    } else {
-        $message .= "Failed to prepare daily sales query: " . $conn->error . "<br>";
-        $message_type = 'danger';
-    }
-
-} catch (mysqli_sql_exception $e) {
+} catch (PDOException $e) {
     $message .= "Database error fetching analytics data: " . $e->getMessage();
     $message_type = 'danger';
 }
 
-$conn->close();
+// Clean up the connection object
+$conn = null;
 
+// =========================================================================
+// HTML / View Code (Body content remains unchanged)
+// =========================================================================
 ?>
-
-
 
         <div id="printableArea" class="container-fluid dashboard-page-content mt-5 pt-3">
             <div class="print-header">
@@ -162,6 +94,7 @@ $conn->close();
                         <div class="col-12">
                             <div class="table-responsive">
                                 <table class="table table-bordered table-striped">
+                                    
                                     <thead>
                                         <tr>
                                             <th colspan="3" class="table-primary text-center">Top 10 Selling Products (by Quantity)</th>
@@ -183,10 +116,11 @@ $conn->close();
                                             <?php endforeach; ?>
                                         <?php else: ?>
                                             <tr>
-                                                <td colspan="3">No top-selling products found for this period.</td>
+                                                <td colspan="3" class="text-center">No top-selling products found for this period.</td>
                                             </tr>
                                         <?php endif; ?>
                                     </tbody>
+
                                     <thead>
                                         <tr>
                                             <th colspan="3" class="table-success text-center">Daily Sales Trend</th>
@@ -206,10 +140,11 @@ $conn->close();
                                             <?php endforeach; ?>
                                         <?php else: ?>
                                             <tr>
-                                                <td colspan="3">No daily sales trend data found for this period.</td>
+                                                <td colspan="3" class="text-center">No daily sales trend data found for this period.</td>
                                             </tr>
                                         <?php endif; ?>
                                     </tbody>
+
                                     <thead>
                                         <tr>
                                             <th colspan="3" class="table-info text-center">Sales by Cashier</th>
@@ -231,7 +166,7 @@ $conn->close();
                                             <?php endforeach; ?>
                                         <?php else: ?>
                                             <tr>
-                                                <td colspan="3">No cashier sales data found for this period.</td>
+                                                <td colspan="3" class="text-center">No cashier sales data found for this period.</td>
                                             </tr>
                                         <?php endif; ?>
                                     </tbody>
@@ -248,32 +183,6 @@ $conn->close();
 <?php
         // Close layout (footer, scripts, closing tags)
         include '../includes/layout_end.php'; ?>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const alertElement = document.querySelector('.alert');
-        if (alertElement) {
-            setTimeout(() => {
-                const bootstrapAlert = new bootstrap.Alert(alertElement);
-                bootstrapAlert.close();
-            }, 5000); // 5 seconds
-        }
-    });
-
-    function printReportInNewWindow() {
-        var content = document.getElementById('printableArea').innerHTML;
-        var printWindow = window.open('', '_blank');
-        printWindow.document.write('<html><head><title>Sales Analytics Report</title>');
-        printWindow.document.write('<link rel="stylesheet" href="../../public/css/report.css" media="all">');
-        printWindow.document.write('</head><body>');
-        printWindow.document.write(content);
-        printWindow.document.write('</body></html>');
-        printWindow.document.close();
-        printWindow.focus();
-        setTimeout(function() {
-            printWindow.print();
-            printWindow.close();
-        }, 500); // Wait for styles to apply before printing
-    }
-</script>
+<script src="../public/js/sales_analytics.js"></script>
 </body>
 </html>

@@ -92,8 +92,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $is_admin) {
     // Description (optional)
     $description = trim($_POST["description"]);
 
-    // Supplier ID (optional, you'd add validation and fetching suppliers here)
-    $supplier_id = !empty(trim($_POST["supplier_id"])) ? intval(trim($_POST["supplier_id"])) : NULL;
+   $supplier_id = isset($_POST["supplier_id"]) && trim($_POST["supplier_id"]) !== "" ? intval(trim($_POST["supplier_id"])) : NULL;
 
 
     // Check input errors before inserting into database
