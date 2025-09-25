@@ -1,16 +1,14 @@
 <?php
-session_start();
 
-// Check if the user is logged in, if not then redirect to login page
-if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
-    header("location: login.php");
-    exit;
-}
+        include '../includes/auth_check.php';
+        include '../includes/layout_start.php';
+        include '../includes/functions.php';
+        include '../config/db.php';
 
-// Set a flag to check if the user is an admin
-$is_admin = ($_SESSION['role'] === 'admin');
+        // Set a flag to check if the user is an admin
+        $is_admin = ($_SESSION['role'] === 'admin');
 
-require_once '../config/db.php';
+
 
 // Initialize variables
 $name = $barcode = $description = $price = $cost_price = $stock_quantity = $category_id = $supplier_id = $brand = "";
@@ -137,34 +135,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && $is_admin) {
     unset($pdo);
 }
 
-// Include the common header file
-include '../includes/header.php';
+
 ?>
-    <div class="dashboard-wrapper">
-        <?php include '../includes/sidebar.php'; ?>
-        <div class="main-content" id="main-content">
-            <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top px-3 custom-navbar-top">
-                <div class="container-fluid">
-                    <button id="sidebarToggle" class="btn btn-outline-light d-lg-none me-3" type="button">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-                    <button id="sidebarToggleDesktop" class="btn btn-outline-light d-none d-lg-block me-3" type="button">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                    <a class="navbar-brand" href="#">POS System</a>
-                    <div class="collapse navbar-collapse" id="navbarNav">
-                        <ul class="navbar-nav me-auto mb-2 mb-lg-0"></ul>
-                        <ul class="navbar-nav ms-auto">
-                            <li class="nav-item d-flex align-items-center">
-                                <span class="nav-link text-white me-2">Welcome, <?php echo htmlspecialchars($_SESSION["username"]); ?> (<?php echo htmlspecialchars($_SESSION["role"]); ?>)</span>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link btn btn-danger btn-sm text-white" href="../index.php">Logout</a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </nav>
+    
             <div class="container-fluid dashboard-page-content mt-5 pt-3">
                 <h2 class="mb-4">Add New Product</h2>
 
@@ -254,8 +227,6 @@ include '../includes/header.php';
             </div>
         </div>
     </div>
-    <div class="overlay" id="overlay"></div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../public/js/main.js"></script>
-</body>
-</html>
+    <?php
+        // Close layout (footer, scripts, closing tags)
+        include '../includes/layout_end.php'; ?>

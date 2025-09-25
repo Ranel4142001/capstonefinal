@@ -1,5 +1,5 @@
 // public/js/detailed_sales_report_script.js
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const filterForm = document.getElementById('filterForm');
     const startDateInput = document.getElementById('start_date');
     const endDateInput = document.getElementById('end_date');
@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const recordsPerPage = recordsPerPageSelect.value;
 
         try {
-            const response = await fetch(`../../api/sales_reports.php?action=list_sales&start_date=${startDate}&end_date=${endDate}&records_per_page=${recordsPerPage}&page=${page}`);
+            const response = await fetch(`../api/sales_reports.php?action=list_sales&start_date=${startDate}&end_date=${endDate}&records_per_page=${recordsPerPage}&page=${page}`);
             const data = await response.json();
 
             if (data.status === 'success') {
@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const endDate = endDateInput.value;
 
         try {
-            const response = await fetch(`../../api/sales_reports.php?action=get_summary&start_date=${startDate}&end_date=${endDate}`);
+            const response = await fetch(`../api/sales_reports.php?action=get_summary&start_date=${startDate}&end_date=${endDate}`);
             const data = await response.json();
 
             if (data.status === 'success' && data.summary) {
@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Add event listeners to new pagination links
         paginationNav.querySelectorAll('.page-link').forEach(link => {
-            link.addEventListener('click', function(e) {
+            link.addEventListener('click', function (e) {
                 e.preventDefault();
                 const newPage = parseInt(this.dataset.page);
                 if (newPage > 0 && newPage <= totalPages) {
@@ -158,7 +158,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // --- Event Listener for Filter Form Submission ---
     if (filterForm) {
-        filterForm.addEventListener('submit', function(e) {
+        filterForm.addEventListener('submit', function (e) {
             e.preventDefault(); // Prevent default form submission
             loadSalesData();    // Load data for the first page with new filters
             loadSummaryData();  // Load summary data with new filters
@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // --- Custom print function: Opens content in a new window for printing ---
     // This function remains inline due to dynamic PHP variable for CSS path in new window.
-    window.printReportInNewWindow = function() {
+    window.printReportInNewWindow = function () {
         var printContents = document.getElementById('printableArea').innerHTML;
         var originalTitle = document.title; // Store original title
 
@@ -217,8 +217,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Give the browser a moment to render the new window's content and load CSS
         // Then trigger the print.
-        printWindow.onload = function() {
-            setTimeout(function() {
+        printWindow.onload = function () {
+            setTimeout(function () {
                 printWindow.print();
                 printWindow.close(); // Close the print window after printing
             }, 500); // Small delay to ensure CSS loads

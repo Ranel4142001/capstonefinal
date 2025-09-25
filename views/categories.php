@@ -1,68 +1,11 @@
 <?php
-// views/categories.php
 
-// Include authentication check to ensure the user is logged in.
-// This prevents unauthorized access to the categories management page.
-require_once '../includes/auth_check.php';
-
-// Include common utility functions.
-// This file is expected to contain 'get_db_connection()' and 'sanitize_input()'.
-require_once '../includes/functions.php';
-
-// Start a session if one has not already been started.
-// Sessions are used here to store and display success/error messages after redirects.
-// (Although AJAX will handle messages for CRUD, session might be used for other purposes, e.g., login status)
-if (session_status() == PHP_SESSION_NONE) {
-    session_start();
-}
-
-// -----------------------------------------------------------------------------
-// PHP logic removed:
-// - Database connection ($conn = get_db_connection();) is now done in api/categories.php
-// - Handling Category Operations (Add, Edit, Delete) via POST requests is now handled by api/categories.php
-// - Session message handling ($_SESSION['message'], unset($_SESSION['message'])) is now handled by JavaScript alerts from API responses.
-// - Fetching Categories for Display is now handled by JavaScript calling api/categories.php
-// - Database connection closure ($conn->close();) is now done in api/categories.ยม
-// -----------------------------------------------------------------------------
-
-// Include the common header file. This file usually contains the <head> section and the opening <body> tag.
-include '../includes/header.php';
+        include '../includes/auth_check.php';
+        include '../includes/layout_start.php';
+        include '../includes/functions.php';
+        
 ?>
-    <div class="dashboard-wrapper">
-        <?php
-        // Include the sidebar navigation.
-        include '../includes/sidebar.php';
-        ?>
-        <div class="main-content" id="main-content">
-            <!-- Custom Navbar/Top Bar. This structure is consistent across your dashboard views. -->
-            <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top px-3 custom-navbar-top">
-                <div class="container-fluid">
-                    <!-- Button to toggle sidebar on smaller screens -->
-                    <button id="sidebarToggle" class="btn btn-outline-light d-lg-none me-3" type="button">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-                    <!-- Button to toggle sidebar on larger screens (desktop) -->
-                    <button id="sidebarToggleDesktop" class="btn btn-outline-light d-none d-lg-block me-3" type="button">
-                        <i class="fas fa-bars"></i> <!-- Font Awesome icon for a menu bar -->
-                    </button>
-                    <a class="navbar-brand" href="#">POS System</a>
-                    <div class="collapse navbar-collapse" id="navbarNav">
-                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                            <!-- Placeholder for potentially adding more navigation links on the left -->
-                        </ul>
-                        <ul class="navbar-nav ms-auto">
-                            <!-- Display welcome message with username and role from session -->
-                            <li class="nav-item d-flex align-items-center">
-                                <span class="nav-link text-white me-2">Welcome, <?php echo htmlspecialchars($_SESSION["username"] ?? 'Guest'); ?> (<?php echo htmlspecialchars($_SESSION["role"] ?? 'N/A'); ?>)</span>
-                            </li>
-                            <!-- Logout button -->
-                            <li class="nav-item">
-                                <a class="nav-link btn btn-danger btn-sm text-white" href="../logout.php">Logout</a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </nav>
+    
 
             <div class="container-fluid dashboard-page-content mt-5 pt-3">
                 <h2 class="mb-4">Category Management</h2>
@@ -187,14 +130,8 @@ include '../includes/header.php';
         </div>
     </div>
 
-    <!-- This overlay likely corresponds to a custom loading spinner or general overlay -->
-    <div class="overlay" id="overlay"></div>
-
-    <!-- Include Bootstrap 5 JavaScript bundle (Popper.js included) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Your main.js for global JavaScript functionalities (e.g., sidebar toggling) -->
-    <script src="../public/js/main.js"></script>
-    <!-- NEW: Include the specific JavaScript for categories to handle AJAX operations -->
+   <?php // Close layout (footer, scripts, closing tags)
+    include '../includes/layout_end.php'; ?>
     <script src="../public/js/categories_script.js"></script>
     <script>
         // Auto-hide alerts after a few seconds for better user experience.

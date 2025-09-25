@@ -1,18 +1,11 @@
 <?php
-// views/reports/stock_report.php
+        
+        include '../includes/auth_check.php';
+        include '../includes/layout_start.php';
+        include '../includes/functions.php';
+        include '../config/db.php';
 
-// 1. Authenticate and start session FIRST
-require_once '../../includes/auth_check.php';
 
-// Ensure only 'admin' or 'staff' can access this page
-if (empty($_SESSION['role']) || ($_SESSION['role'] !== 'admin' && $_SESSION['role'] !== 'staff')) {
-    header("Location: ../dashboard.php"); // Redirect to dashboard or login page if not authorized
-    exit();
-}
-
-// 2. Include other necessary PHP files for database connection and functions
-require_once '../../config/db.php';
-require_once '../../includes/functions.php'; // Ensure this contains get_db_connection() and sanitize_input()
 
 // --- Date Filtering Logic ---
 $start_date = isset($_GET['start_date']) ? sanitize_input($_GET['start_date']) : date('Y-m-01'); // Default to start of current month
@@ -156,36 +149,8 @@ try {
 // Close database connection
 $conn->close();
 
-// 3. Include the header AFTER all PHP logic that might use sessions or send headers
-require_once '../../includes/header.php'; // Adjust path based on your file structure
-?>
 
-<div class="dashboard-wrapper">
-    <?php include '../../includes/sidebar.php'; // Adjust path ?>
-    <div class="main-content" id="main-content">
-        <?php $base_url_path = '/capstonefinal'; // Adjust if your base URL path is different ?>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top px-3 custom-navbar-top no-print">
-            <div class="container-fluid">
-                <button id="sidebarToggle" class="btn btn-outline-light d-lg-none me-3" type="button">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <button id="sidebarToggleDesktop" class="btn btn-outline-light d-none d-lg-block me-3" type="button">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <a class="navbar-brand" href="#">POS System</a>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0"></ul>
-                    <ul class="navbar-nav ms-auto">
-                        <li class="nav-item d-flex align-items-center">
-                            <span class="nav-link text-white me-2">Welcome, <?php echo htmlspecialchars($_SESSION["username"]); ?> (<?php echo htmlspecialchars($_SESSION["role"]); ?>)</span>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link btn btn-danger btn-sm text-white" href="<?php echo $base_url_path; ?>/index.php">Logout</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
+?>
 
         <div id="printableArea" class="container-fluid dashboard-page-content mt-5 pt-3">
             <div class="print-header">
@@ -333,9 +298,9 @@ require_once '../../includes/header.php'; // Adjust path based on your file stru
     </div>
 </div>
 
-<div class="overlay" id="overlay"></div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="../../public/js/main.js"></script>
+<?php
+        // Close layout (footer, scripts, closing tags)
+        include '../includes/layout_end.php'; ?>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const alertElement = document.querySelector('.alert');

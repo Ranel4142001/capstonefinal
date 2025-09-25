@@ -31,7 +31,7 @@ $base_url_path = '/capstonefinal'; // Adjust if your folder structure changes
             </a>
             <ul class="collapse list-unstyled" id="inventoryControlSubmenu">
                 <li>
-                    <a href="<?= $base_url_path; ?>/views/reports/add_stocks.php" class="sidebar-link submenu-link">
+                    <a href="<?= $base_url_path; ?>/views/add_stocks.php" class="sidebar-link submenu-link">
                         <i class="fas fa-boxes"></i> Add Stocks
                     </a>
                 </li>
@@ -70,12 +70,12 @@ $base_url_path = '/capstonefinal'; // Adjust if your folder structure changes
             </a>
             <ul class="collapse list-unstyled" id="salesReportsSubmenu">
                 <li>
-                    <a href="<?= $base_url_path; ?>/views/reports/detailed_sales_report.php" class="sidebar-link submenu-link">
+                    <a href="<?= $base_url_path; ?>/views/detailed_sales_report.php" class="sidebar-link submenu-link">
                         <i class="fas fa-file-invoice-dollar"></i> Detailed Sales
                     </a>
                 </li>
                 <li>
-                    <a href="<?= $base_url_path; ?>/views/reports/sales_analytics.php" class="sidebar-link submenu-link">
+                    <a href="<?= $base_url_path; ?>/views/sales_analytics.php" class="sidebar-link submenu-link">
                         <i class="fas fa-chart-pie"></i> Sales Analytics
                     </a>
                 </li>
@@ -83,7 +83,7 @@ $base_url_path = '/capstonefinal'; // Adjust if your folder structure changes
         </li>
 
         <li>
-            <a href="<?= $base_url_path; ?>/views/reports/stock_report.php" class="sidebar-link submenu-link">
+            <a href="<?= $base_url_path; ?>/views/stock_report.php" class="sidebar-link submenu-link">
                 <i class="fas fa-boxes"></i> Stock Reports
             </a>
         </li>

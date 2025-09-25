@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Function to load products into the dropdown and inventory table
     function loadProducts() {
         // CORRECTED PATH: '../../api/stocks.php' to go up two directories from views/reports/
-        fetch('../../api/stocks.php?action=list_products')
+        fetch(' ../api/stocks.php?action=list_products')
             .then(response => {
                 if (!response.ok) {
                     // If response is not OK (e.g., 404, 500), throw an error
@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', function () {
             formData.append('action', 'add_stock'); // Specify the action for the API
 
             // CORRECTED PATH for POST request
-            fetch('../../api/stocks.php', {
+            fetch('../api/stocks.php', {
                 method: 'POST',
                 body: formData
             })

@@ -1,5 +1,5 @@
 // public/js/user_management_script.js
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Function to load and display users in the table
     function loadUsers() {
         fetch('../api/users.php?action=list') // Make a GET request to the API to list users
@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Event listener for Add User Form submission
     const addUserForm = document.getElementById('addUserForm');
     if (addUserForm) {
-        addUserForm.addEventListener('submit', function(e) {
+        addUserForm.addEventListener('submit', function (e) {
             e.preventDefault(); // Prevent default form submission
 
             const formData = new FormData(this); // Collect form data
@@ -65,28 +65,28 @@ document.addEventListener('DOMContentLoaded', function() {
                 method: 'POST', // Use POST method for adding data
                 body: formData   // Send the form data
             })
-            .then(response => response.json()) // Parse the JSON response
-            .then(data => {
-                if (data.status === 'success') {
-                    // Hide the modal and reset the form on success
-                    const addModal = bootstrap.Modal.getInstance(document.getElementById('addUserModal'));
-                    if (addModal) addModal.hide();
-                    addUserForm.reset();
-                    loadUsers(); // Reload users to update the table
-                    alert(data.message); // Show success message
-                } else {
-                    alert(data.message); // Show error message
-                }
-            })
-            .catch(error => {
-                console.error("Error adding user:", error);
-                alert("Error adding user. Please check your input.");
-            });
+                .then(response => response.json()) // Parse the JSON response
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Hide the modal and reset the form on success
+                        const addModal = bootstrap.Modal.getInstance(document.getElementById('addUserModal'));
+                        if (addModal) addModal.hide();
+                        addUserForm.reset();
+                        loadUsers(); // Reload users to update the table
+                        alert(data.message); // Show success message
+                    } else {
+                        alert(data.message); // Show error message
+                    }
+                })
+                .catch(error => {
+                    console.error("Error adding user:", error);
+                    alert("Error adding user. Please check your input.");
+                });
         });
     }
 
     // Event delegation for Edit User buttons (since they are added dynamically)
-    document.querySelector('#userTable tbody').addEventListener('click', function(e) {
+    document.querySelector('#userTable tbody').addEventListener('click', function (e) {
         if (e.target.classList.contains('edit-user-btn')) {
             const button = e.target;
             // Populate the edit modal fields with data from the clicked button's data-attributes
@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Event listener for Edit User Form submission
     const editUserForm = document.getElementById('editUserForm');
     if (editUserForm) {
-        editUserForm.addEventListener('submit', function(e) {
+        editUserForm.addEventListener('submit', function (e) {
             e.preventDefault(); // Prevent default form submission
 
             const formData = new FormData(this); // Collect form data
@@ -111,27 +111,27 @@ document.addEventListener('DOMContentLoaded', function() {
                 method: 'POST', // Use POST method for editing data
                 body: formData   // Send the form data
             })
-            .then(response => response.json()) // Parse the JSON response
-            .then(data => {
-                if (data.status === 'success') {
-                    // Hide the modal on success
-                    const editModal = bootstrap.Modal.getInstance(document.getElementById('editUserModal'));
-                    if (editModal) editModal.hide();
-                    loadUsers(); // Reload users to update the table
-                    alert(data.message); // Show success message
-                } else {
-                    alert(data.message); // Show error message
-                }
-            })
-            .catch(error => {
-                console.error("Error updating user:", error);
-                alert("Error updating user. Please try again.");
-            });
+                .then(response => response.json()) // Parse the JSON response
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Hide the modal on success
+                        const editModal = bootstrap.Modal.getInstance(document.getElementById('editUserModal'));
+                        if (editModal) editModal.hide();
+                        loadUsers(); // Reload users to update the table
+                        alert(data.message); // Show success message
+                    } else {
+                        alert(data.message); // Show error message
+                    }
+                })
+                .catch(error => {
+                    console.error("Error updating user:", error);
+                    alert("Error updating user. Please try again.");
+                });
         });
     }
 
     // Event delegation for Delete User buttons
-    document.querySelector('#userTable tbody').addEventListener('click', function(e) {
+    document.querySelector('#userTable tbody').addEventListener('click', function (e) {
         if (e.target.classList.contains('delete-user-btn')) {
             const button = e.target;
             // Populate the delete confirmation modal
@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Event listener for Delete User Confirmation Form submission
     const deleteUserForm = document.getElementById('deleteUserForm');
     if (deleteUserForm) {
-        deleteUserForm.addEventListener('submit', function(e) {
+        deleteUserForm.addEventListener('submit', function (e) {
             e.preventDefault(); // Prevent default form submission
 
             const formData = new FormData(this); // Collect form data
@@ -153,22 +153,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 method: 'POST', // Use POST method for deleting data
                 body: formData   // Send the form data
             })
-            .then(response => response.json()) // Parse the JSON response
-            .then(data => {
-                if (data.status === 'success') {
-                    // Hide the modal on success
-                    const deleteModal = bootstrap.Modal.getInstance(document.getElementById('deleteUserModal'));
-                    if (deleteModal) deleteModal.hide();
-                    loadUsers(); // Reload users to update the table
-                    alert(data.message); // Show success message
-                } else {
-                    alert(data.message); // Show error message
-                }
-            })
-            .catch(error => {
-                console.error("Error deleting user:", error);
-                alert("Error deleting user. Please try again.");
-            });
+                .then(response => response.json()) // Parse the JSON response
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Hide the modal on success
+                        const deleteModal = bootstrap.Modal.getInstance(document.getElementById('deleteUserModal'));
+                        if (deleteModal) deleteModal.hide();
+                        loadUsers(); // Reload users to update the table
+                        alert(data.message); // Show success message
+                    } else {
+                        alert(data.message); // Show error message
+                    }
+                })
+                .catch(error => {
+                    console.error("Error deleting user:", error);
+                    alert("Error deleting user. Please try again.");
+                });
         });
     }
 });

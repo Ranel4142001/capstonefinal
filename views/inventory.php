@@ -1,20 +1,12 @@
 <?php
-session_start();
 
-// Check if the user is logged in, if not then redirect to login page
-if (!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true) {
-    header("location: login.php");
-    exit;
-}
+        include '../includes/auth_check.php';
+        include '../includes/layout_start.php';
+        include '../includes/functions.php';
+        include '../config/db.php';
 
-// Optional: Check role for inventory access if needed, e.g.:
-// if ($_SESSION['role'] !== 'admin' && $_SESSION['role'] !== 'manager') {
-//     header("location: dashboard.php"); // Or unauthorized page
-//     exit;
-// }
-
-// Include database connection (though most data will be fetched via JS/API)
-require_once '../config/db.php';
+        
+         $isAdmin = ($_SESSION['role'] === 'admin');
 
 // Fetch categories for the filter dropdown
 $categories = [];
@@ -26,39 +18,9 @@ try {
     error_log("Error fetching categories: " . $e->getMessage());
 }
 
-// Include the common header file
-// This will bring in the <head> section and the opening <body> tag
-include '../includes/header.php';
+
 ?>
 
-    <div class="dashboard-wrapper">
-
-        <?php include '../includes/sidebar.php'; ?>
-
-        <div class="main-content" id="main-content">
-            <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top px-3 custom-navbar-top">
-                <div class="container-fluid">
-                    <button id="sidebarToggle" class="btn btn-outline-light d-lg-none me-3" type="button">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-                    <button id="sidebarToggleDesktop" class="btn btn-outline-light d-none d-lg-block me-3" type="button">
-                        <i class="fas fa-bars"></i> </button>
-
-                    <a class="navbar-brand" href="#">POS System</a>
-
-                    <div class="collapse navbar-collapse" id="navbarNav">
-                        <ul class="navbar-nav me-auto mb-2 mb-lg-0"></ul>
-                        <ul class="navbar-nav ms-auto">
-                            <li class="nav-item d-flex align-items-center">
-                                <span class="nav-link text-white me-2">Welcome, <?php echo htmlspecialchars($_SESSION["username"]); ?> (<?php echo htmlspecialchars($_SESSION["role"]); ?>)</span>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link btn btn-danger btn-sm text-white" href="../index.php">Logout</a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </nav>
 
             <div class="container-fluid dashboard-page-content mt-5 pt-3">
                 <h2 class="mb-4">Products</h2>
@@ -121,61 +83,99 @@ include '../includes/header.php';
         </div>
     </div>
 
-    <div class="overlay" id="overlay"></div>
 
     <div class="modal fade" id="editProductModal" tabindex="-1" aria-labelledby="editProductModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="editProductModalLabel">Edit Product</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="editProductForm">
-                        <input type="hidden" id="editProductId" name="id">
-                        <div class="mb-3">
-                            <label for="editProductName" class="form-label">Product Name</label>
-                            <input type="text" class="form-control" id="editProductName" name="name" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="editProductCategory" class="form-label">Category</label>
-                            <select class="form-select" id="editProductCategory" name="category_id" required>
-                                <option value="">Select Category</option>
-                                <?php foreach ($categories as $category): ?>
-                                    <option value="<?php echo htmlspecialchars($category['id']); ?>">
-                                        <?php echo htmlspecialchars($category['name']); ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="editProductPrice" class="form-label">Price</label>
-                            <input type="number" step="0.01" class="form-control" id="editProductPrice" name="price" required>
-            </div>
-            <div class="mb-3">
-            <label for="editProductCostPrice" class="form-label">Cost Price</label>
-            <input type="number" step="0.01" class="form-control" id="editProductCostPrice" name="cost_price" required>
-            </div>
-            <div class="mb-3">
-            <label for="editProductStock" class="form-label">Stock</label>
-                            <input type="number" class="form-control" id="editProductStock" name="stock_quantity" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="editProductBarcode" class="form-label">Barcode</label>
-                            <input type="text" class="form-control" id="editProductBarcode" name="barcode">
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-primary">Save changes</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editProductModalLabel">Product Details</h5>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../public/js/main.js"></script>
+         <?php if ($_SESSION['role'] !== 'admin'): ?>
+            <small class="text-muted position-absolute start-0 mt-5 ms-3">
+             You cannot edit products — only the admin can make changes.
+            </small>
+             <?php endif; ?>
+
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <form id="editProductForm">
+          <input type="hidden" id="editProductId" name="id">
+
+          <div class="mb-3">
+            <label for="editProductName" class="form-label">Product Name</label>
+            <input type="text" class="form-control" id="editProductName" name="name" <?php echo !$isAdmin ? 'readonly' : ''; ?> required>
+          </div>
+
+          <div class="mb-3">
+            <label for="editProductCategory" class="form-label">Category</label>
+            <select class="form-select" id="editProductCategory" name="category_id" <?php echo !$isAdmin ? 'disabled' : ''; ?> required>
+              <option value="">Select Category</option>
+              <?php foreach ($categories as $category): ?>
+                <option value="<?php echo htmlspecialchars($category['id']); ?>">
+                  <?php echo htmlspecialchars($category['name']); ?>
+                </option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label for="editProductPrice" class="form-label">Price</label>
+            <input type="number" step="0.01" class="form-control" id="editProductPrice" name="price" <?php echo !$isAdmin ? 'readonly' : ''; ?> required>
+          </div>
+
+          <div class="mb-3">
+            <label for="editProductCostPrice" class="form-label">Cost Price</label>
+            <input type="number" step="0.01" class="form-control" id="editProductCostPrice" name="cost_price" <?php echo !$isAdmin ? 'readonly' : ''; ?> required>
+          </div>
+
+          <div class="mb-3">
+            <label for="editProductStock" class="form-label">Stock</label>
+            <input type="number" class="form-control" id="editProductStock" name="stock_quantity" <?php echo !$isAdmin ? 'readonly' : ''; ?> required>
+          </div>
+
+          <div class="mb-3">
+            <label for="editProductBarcode" class="form-label">Barcode</label>
+            <input type="text" class="form-control" id="editProductBarcode" name="barcode" <?php echo !$isAdmin ? 'readonly' : ''; ?>>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <?php if ($isAdmin): ?>
+              <button type="submit" class="btn btn-primary">Save changes</button>
+            <?php endif; ?>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Frontend: Disable edit/delete buttons for non-admins
+document.addEventListener('DOMContentLoaded', function () {
+  const role = "<?php echo $userRole; ?>";
+  if (role !== 'admin') {
+    document.querySelectorAll('.edit-btn, .delete-btn').forEach(btn => {
+      btn.classList.add('disabled');
+      btn.style.pointerEvents = 'none';
+      btn.title = 'You do not have permission to edit or delete products.';
+    });
+
+    // Prevent form submission if someone inspects element and tries to enable it
+    const form = document.getElementById('editProductForm');
+    form.addEventListener('submit', function (e) {
+      if (role !== 'admin') {
+        e.preventDefault();
+        alert('You do not have permission to edit this product.');
+      }
+    });
+  }
+});
+</script>
+
+   <?php // Close layout (footer, scripts, closing tags)
+    include '../includes/layout_end.php'; ?>
     <script src="../public/js/inventory_script.js"></script>
-</body>
-</html>
+

@@ -1,22 +1,18 @@
 <?php
-// products.php - Your API endpoint
+// products.php - API endpoint for products
 
-// Enable CORS for AJAX requests if your frontend is on a different origin (e.g., different port)
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE");
 header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
-// Enable error reporting for debugging. IMPORTANT: DISABLE OR SET TO 0 IN PRODUCTION.
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-session_start(); // Start session to access user_id for logging
-
-
-require_once '../config/db.php'; // Your database connection using PDO
+session_start();
+require_once '../config/db.php';
 
 $method = $_SERVER['REQUEST_METHOD'];
 
@@ -24,48 +20,48 @@ switch ($method) {
     case 'GET':
         handleGetRequest($pdo);
         break;
+
     case 'POST':
-        // Only admins can add products
         if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
             http_response_code(403);
-            echo json_encode(array("success" => false, "message" => "You do not have permission to add products."));
+            echo json_encode(["success" => false, "message" => "You do not have permission to add products."]);
             exit;
         }
-        // handlePostRequest($pdo);
-        http_response_code(405);
-        echo json_encode(array("message" => "POST method not implemented."));
+        handlePostRequest($pdo);
         break;
+
     case 'PUT':
-        // Only admins can edit products
         if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
             http_response_code(403);
-            echo json_encode(array("success" => false, "message" => "You do not have permission to edit products."));
+            echo json_encode(["success" => false, "message" => "You do not have permission to edit products."]);
             exit;
         }
         handlePutRequest($pdo);
         break;
+
     case 'DELETE':
-        // Only admins can delete products
         if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
             http_response_code(403);
-            echo json_encode(array("success" => false, "message" => "You do not have permission to delete products."));
+            echo json_encode(["success" => false, "message" => "You do not have permission to delete products."]);
             exit;
         }
         handleDeleteRequest($pdo);
         break;
+
     default:
-        http_response_code(405); // Method Not Allowed
-        echo json_encode(array("message" => "Method not allowed."));
+        http_response_code(405);
+        echo json_encode(["message" => "Method not allowed."]);
         break;
 }
 
+// === GET ===
 function handleGetRequest($pdo) {
     $searchTerm = trim($_GET['search'] ?? '');
     $categoryId = $_GET['category_id'] ?? '';
     $limit = (int)($_GET['limit'] ?? 10);
     $offset = (int)($_GET['offset'] ?? 0);
 
-    $sql = "SELECT p.id, p.name, p.barcode, p.price, p.cost_price, p.stock_quantity, c.name as category_name
+    $sql = "SELECT p.id, p.name, p.barcode, p.price, p.cost_price, p.stock_quantity, p.category_id, c.name AS category_name
             FROM products p
             LEFT JOIN categories c ON p.category_id = c.id";
     $conditions = [];
@@ -82,6 +78,7 @@ function handleGetRequest($pdo) {
             $params[':searchPartialBarcode'] = "%" . $searchTerm . "%";
         }
     }
+
     if (!empty($categoryId)) {
         $conditions[] = "p.category_id = :categoryId";
         $params[':categoryId'] = $categoryId;
@@ -115,16 +112,62 @@ function handleGetRequest($pdo) {
         $stmt->execute();
         $products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        echo json_encode(array("success" => true, "products" => $products, "total" => $totalProducts, "message" => "Products fetched successfully."));
+        echo json_encode(["success" => true, "products" => $products, "total" => $totalProducts]);
 
     } catch (PDOException $e) {
-        error_log("Error fetching products: " . $e->getMessage() . "\nSQL: " . $main_sql . "\nParams: " . print_r($params, true) . "\nLimit: " . $limit . "\nOffset: " . $offset);
         http_response_code(500);
-        echo json_encode(array("success" => false, "message" => "Error fetching products: " . $e->getMessage()));
+        echo json_encode(["success" => false, "message" => "Error fetching products: " . $e->getMessage()]);
     }
 }
 
-// --- DEFINE handlePutRequest FUNCTION (UPDATED WITH STOCK HISTORY LOGGING) ---
+// === POST ===
+function handlePostRequest($pdo) {
+    $input = file_get_contents('php://input');
+    $data = json_decode($input, true);
+
+    if (json_last_error() !== JSON_ERROR_NONE || !isset($data['product'])) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'Invalid JSON input for POST.']);
+        exit();
+    }
+
+    $product = $data['product'];
+    $required_fields = ['barcode', 'name', 'price', 'stock_quantity', 'category_id'];
+
+    foreach ($required_fields as $field) {
+        if (!isset($product[$field]) || $product[$field] === '') {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => "Missing required field: {$field}"]);
+            exit();
+        }
+    }
+
+    $cost_price = $product['cost_price'] ?? 0;
+
+    try {
+        $stmt = $pdo->prepare("INSERT INTO products (barcode, name, category_id, price, cost_price, stock_quantity) 
+                               VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->execute([
+            $product['barcode'],
+            $product['name'],
+            $product['category_id'],
+            $product['price'],
+            $product['cost_price'],
+            $product['stock_quantity']
+        ]);
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'Product created successfully.',
+            'product_id' => $pdo->lastInsertId()
+        ]);
+    } catch (PDOException $e) {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'message' => 'Error creating product: ' . $e->getMessage()]);
+    }
+}
+
+// === PUT ===
 function handlePutRequest($pdo) {
     $input = file_get_contents('php://input');
     $data = json_decode($input, true);
@@ -135,9 +178,9 @@ function handlePutRequest($pdo) {
         exit();
     }
 
-    $required_fields = ['id', 'name', 'category_id', 'cost_price', 'price', 'stock_quantity'];
+    $required_fields = ['id', 'name', 'category_id', 'cost_price', 'price', 'stock_quantity', 'barcode'];
     foreach ($required_fields as $field) {
-        if (!isset($data[$field]) || ($field !== 'barcode' && $data[$field] === '')) {
+        if (!isset($data[$field]) || $data[$field] === '') {
             http_response_code(400);
             echo json_encode(['success' => false, 'message' => "Missing or empty required field: {$field}"]);
             exit();
@@ -145,84 +188,27 @@ function handlePutRequest($pdo) {
     }
 
     try {
-        $product_id = $data['id'];
-        $name = $data['name'];
-        $category_id = $data['category_id'];
-        $price = $data['price'];
-        $cost_price = $data['cost_price'];
-        $new_stock_quantity = $data['stock_quantity'];
-        $barcode = $data['barcode'] ?? null;
+        $stmt = $pdo->prepare("UPDATE products 
+                               SET name=?, category_id=?, price=?, cost_price=?, stock_quantity=?, barcode=? 
+                               WHERE id=?");
+        $stmt->execute([
+            $data['name'],
+            $data['category_id'],
+            $data['price'],
+            $data['cost_price'],
+            $data['stock_quantity'],
+            $data['barcode'],
+            $data['id']
+        ]);
 
-        // --- Step 1: Get the current stock quantity BEFORE the update ---
-        $stmt = $pdo->prepare("SELECT stock_quantity FROM products WHERE id = ?");
-        $stmt->execute([$product_id]);
-        $current_product = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if (!$current_product) {
-            http_response_code(404);
-            echo json_encode(array("success" => false, "message" => "Product not found."));
-            return;
-        }
-
-        $old_stock_quantity = $current_product['stock_quantity'];
-
-        // --- Step 2: Update the product in the products table ---
-        $stmt = $pdo->prepare("UPDATE products SET
-                                    name = ?,
-                                    category_id = ?,
-                                    price = ?,
-                                    cost_price = ?,
-                                    stock_quantity = ?,
-                                    barcode = ?
-                                WHERE id = ?");
-        
-        // Corrected: The order of variables now matches the order in the SQL query
-        $stmt->execute([$name, $category_id, $price, $cost_price, $new_stock_quantity, $barcode, $product_id]);
-
-        // Check if update was successful (rowCount > 0 means a row was affected)
-        if ($stmt->rowCount() > 0) {
-            // --- Step 3: Log the change in stock_history if stock quantity has changed ---
-            if ($new_stock_quantity != $old_stock_quantity) {
-                $quantity_change = $new_stock_quantity - $old_stock_quantity;
-                $change_type = '';
-                $notes = '';
-
-                if ($quantity_change > 0) {
-                    $change_type = 'adjustment_in';
-                    $notes = 'Manual stock increase via product edit';
-                } elseif ($quantity_change < 0) {
-                    $change_type = 'adjustment_out';
-                    $notes = 'Manual stock decrease via product edit';
-                }
-                
-                if (!empty($change_type)) {
-                    $stmtHistory = $pdo->prepare("INSERT INTO stock_history (product_id, change_type, quantity_change, current_quantity_after_change, user_id, description) VALUES (?, ?, ?, ?, ?, ?)");
-                    $stmtHistory->execute([
-                        $product_id,
-                        $change_type,
-                        $quantity_change,
-                        $new_stock_quantity,
-                        $_SESSION['user_id'] ?? null,
-                        $notes
-                    ]);
-                }
-            }
-
-            http_response_code(200);
-            echo json_encode(array("success" => true, "message" => "Product updated successfully."));
-        } else {
-            http_response_code(200);
-            echo json_encode(array("success" => false, "message" => "Product not found or no changes made."));
-        }
-
+        echo json_encode(['success' => true, 'message' => 'Product updated successfully.']);
     } catch (PDOException $e) {
-        error_log("Product update error: " . $e->getMessage());
         http_response_code(500);
         echo json_encode(['success' => false, 'message' => 'Database error during update: ' . $e->getMessage()]);
     }
 }
 
-// --- DEFINE handleDeleteRequest FUNCTION ---
+// === DELETE ===
 function handleDeleteRequest($pdo) {
     $product_id = $_GET['id'] ?? null;
 
@@ -239,12 +225,10 @@ function handleDeleteRequest($pdo) {
         if ($stmt->rowCount()) {
             echo json_encode(['success' => true, 'message' => 'Product deleted successfully.']);
         } else {
-            http_response_code(404); // Not Found
+            http_response_code(404);
             echo json_encode(['success' => false, 'message' => 'Product not found.']);
         }
-
     } catch (PDOException $e) {
-        error_log("Product deletion error: " . $e->getMessage());
         http_response_code(500);
         echo json_encode(['success' => false, 'message' => 'Database error during deletion: ' . $e->getMessage()]);
     }
