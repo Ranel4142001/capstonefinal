@@ -52,52 +52,36 @@ document.addEventListener('DOMContentLoaded', () => {
         loadingSpinner.style.display = 'block';
 
         const formData = new FormData(addProductForm);
-        const productData = {
-            barcode: formData.get('barcode'),
-            name: formData.get('name'),
-            price: formData.get('price'),
-            cost_price: formData.get('cost_price'),
-            stock_quantity: formData.get('stock_quantity'),
-            category_id: formData.get('category_id')
-        };
-        
+
         try {
             // Step 1: Add the new product
             const response = await fetch('../api/products.php', {
                 method: 'POST',
-                body: JSON.stringify({ product: productData }),
-                headers: {
-                    'Content-Type': 'application/json'
-                }
+                body: formData
             });
-            
+
             const result = await response.json();
-            
-            if (response.ok && result.success) {
-                const initialStock = productData.stock_quantity;
-                if (initialStock > 0) {
-                    // Step 2: If product creation is successful, log the initial stock
-                    // Correctly handle the stock API call with a new FormData object
-                    const stockFormData = new FormData();
-                    stockFormData.append('action', 'add_stock');
-                    stockFormData.append('product_id', result.product_id); // Use the new product ID
-                    stockFormData.append('quantity_to_add', initialStock); // Get stock quantity from form
-    
-                    const stockResponse = await fetch('../api/stocks.php', {
-                        method: 'POST',
-                        body: stockFormData
-                    });
-                    
-                    const stockResult = await stockResponse.json();
-                    
-                    if (stockResponse.ok && stockResult.success) {
-                        showAlert('Product and initial stock added successfully!', 'success');
-                    } else {
-                        showAlert('Product added, but failed to log initial stock: ' + stockResult.message, 'danger');
-                    }
+
+            if (result.success) {
+                // Step 2: If product creation is successful, log the initial stock
+                const stockFormData = new FormData();
+                stockFormData.append('action', 'add_stock');
+                stockFormData.append('product_id', result.product_id); // Use the new product ID
+                stockFormData.append('quantity_to_add', formData.get('stock_quantity')); // Get stock quantity from form
+
+                const stockResponse = await fetch('../api/stocks.php', {
+                    method: 'POST',
+                    body: stockFormData
+                });
+
+                const stockResult = await stockResponse.json();
+
+                if (stockResult.success) {
+                    showAlert('Product and initial stock added successfully!', 'success');
                 } else {
-                    showAlert('Product added successfully!', 'success');
+                    showAlert('Product added, but failed to log initial stock: ' + stockResult.message, 'danger');
                 }
+
                 addProductForm.reset();
             } else {
                 showAlert(result.message, 'danger');
